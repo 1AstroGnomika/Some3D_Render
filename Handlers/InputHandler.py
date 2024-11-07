@@ -1,3 +1,4 @@
+
 from Handlers.Handler import Handler
 
 class InputHandler(Handler):
@@ -11,8 +12,9 @@ class InputHandler(Handler):
     @Handler.handlerEvents
     @staticmethod
     def handleButtons(buttons:tuple[int]) -> None:
-        for button, pressed in enumerate(filter(bool, buttons)):
-            InputHandler.buttonPressed(button)
+        for button, pressed in enumerate(buttons):
+            if pressed:
+                InputHandler.buttonPressed(button)
 
     @Handler.handlerEvents
     @staticmethod

@@ -1,14 +1,14 @@
 from OpenGL.GL import *
 from OpenGL.GLU import *
 from Utils.Tools import StaticClass
+from Utils.Vector3D import Vector3D
 from GameObjects.GameObject import GameObject
 from Renders.Camera import Camera
-from Utils.Vector3D import Vector3D
 from Renders.RenderContainer import RenderContainer
 
 class Render(StaticClass):
 
-    camera:Camera = Camera(float(), float(), Vector3D(float(), float(), -5.0))
+    camera:Camera = Camera(None, list(), list(), Vector3D(), float(), float())
     renderContainer:RenderContainer = RenderContainer()
 
     @staticmethod
@@ -17,11 +17,9 @@ class Render(StaticClass):
 
     @staticmethod
     def draw(gameObject:GameObject) -> None:
-        glBegin(GL_LINES)
         for edges in gameObject.edges:
             for vertex in edges:
-                glVertex3fv(gameObject.vertices[vertex])
-        glEnd()
+                glVertex3fv((Vector3D(*gameObject.vertices[vertex]) + gameObject.point).coordinates())
 
     @staticmethod
     def drawAll() -> None:
@@ -32,9 +30,11 @@ class Render(StaticClass):
     @staticmethod
     def render() -> None:
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-        glTranslatef(*Render.camera.coordinates())
+        glTranslatef(*Render.camera.positionShift().coordinates())
         glPushMatrix()
         glRotatef(0, 1, 0, 0)
         glRotatef(0, 0, 1, 0)
+        glBegin(GL_LINES)
         Render.drawAll()
+        glEnd()
         glPopMatrix()

@@ -1,14 +1,17 @@
 from Utils.Vector3D import Vector3D
+from GameObjects.GameObject import GameObject
 
-class Camera(Vector3D):
+class Camera(GameObject):
 
-    pitch:float  # Вертикальный угол (наклон)
-    yaw:float  # Горизонтальный угол (поворот)
+    central:GameObject
+    __lastCameraPosition:Vector3D
 
-    def __init__(self, pitch:float, yaw:float, position:Vector3D):
-        self.pitch = pitch
-        self.yaw = yaw
-        super().__init__(*position.coordinates())
+    def __init__(self, gameObject:GameObject, *args, **kwargs):
+        self.central = gameObject
+        self.__lastCameraPosition = Vector3D()
+        super().__init__(*args, **kwargs)
 
-    def nextCoordinates(self, speed:float) -> tuple[float]:
-        ...
+    def positionShift(self) -> Vector3D:
+        result:Vector3D = self.point - self.__lastCameraPosition
+        self.__lastCameraPosition = self.point.copy()
+        return result
