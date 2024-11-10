@@ -1,4 +1,4 @@
-import sqlite3
+import sqlite3, typing
   
 class SQLite():
 
@@ -32,71 +32,71 @@ class SQLite():
         self.sqlite_connection = self.cursor = None
 
     @staticmethod
-    def to_table(value:"Any") -> str:
+    def to_table(value:typing.Any) -> str:
         if ((type_name := type(value).__name__) in SQLite.DECODERS) or value is None:
             return f"{value}{SQLite.SEPARATOR}{type_name}"
         return SQLite.to_table(None)
     
     @staticmethod
-    def from_table(record:str) -> "Any":
+    def from_table(record:str) -> typing.Any:
         if SQLite.SEPARATOR in record:
             value, annotation = (lambda args: reversed((args.pop(), str().join(args))))(record.split(SQLite.SEPARATOR))
             if decoder := SQLite.DECODERS.get(annotation):
                 return decoder(value)
         return None
     
-    def __getter(self) -> "yield":
+    def __getter(self) -> typing.Iterable:
         while records := self.cursor.fetchmany(1):
             yield records
     
     def execute(self, *args, **kwargs) -> None:
         return self.cursor.execute(*args, **kwargs)
 
-    def get_table_names(self) -> "yield":
+    def get_table_names(self) -> typing.Iterable:
         self.execute(f"SELECT name FROM sqlite_master WHERE type = 'table'")
         for args in self.__getter():
             yield args[0][0]
     
-    def get_table_column_names(self, table_name:str) -> "yield":
+    def get_table_column_names(self, table_name:str) -> typing.Iterable:
         self.execute(f"PRAGMA table_info({table_name})")
         for args in self.__getter():
             yield args[0][1]
 
-    def get_table_primary_key_columns(self, table_name:str) -> "yield":
+    def get_table_primary_key_columns(self, table_name:str) -> typing.Iterable:
         self.execute(f"PRAGMA table_info({table_name})")
         for args in self.__getter():
             if args[0][5]:
                 yield args[0][1]
 
-    def get_table_params(self, table_name:str) -> "yield":
+    def get_table_params(self, table_name:str) -> typing.Iterable:
         self.execute(f"SELECT * FROM {table_name}")
         for args in self.__getter():
             yield map(SQLite.from_table, args[0])
 
-    def get_table_data(self, table_name:str) -> "yield":
+    def get_table_data(self, table_name:str) -> typing.Iterable:
         table_columns = tuple(self.get_table_column_names(table_name))
         for data in self.get_table_params(table_name):
             yield zip(table_columns, tuple(data))
 
-    def get_all_data(self) -> "yield":
+    def get_all_data(self) -> typing.Iterable:
         for table_name in tuple(self.get_table_names()):
             yield (table_name, self.get_table_data(table_name))
 
-    def get_records(self, table_name:str, column:str, value:"Any") -> "yield":
+    def get_records(self, table_name:str, column:str, value:typing.Any) -> typing.Iterable:
         self.execute(f"SELECT * FROM {table_name} WHERE {column} = ?", (SQLite.to_table(value),))
         for args in self.__getter():
             yield map(SQLite.from_table, args[0])
 
-    def update_records(self, table_name:str, column:str, value:"Any", where_column:str, where_value:"Any") -> None:
+    def update_records(self, table_name:str, column:str, value:typing.Any, where_column:str, where_value:typing.Any) -> None:
         self.execute(f"UPDATE {table_name} SET {column} = ? WHERE {where_column} = ?", (SQLite.to_table(value), SQLite.to_table(where_value)))
 
     def delete_records(self, table_name:str, column:str, value:str) -> None:
         self.execute(f"DELETE FROM {table_name} WHERE {column} = ?", (SQLite.to_table(value),))
 
-    def create_table(self, table_name:str, table_columns:"Iterable") -> None:
+    def create_table(self, table_name:str, table_columns:typing.Iterable) -> None:
         self.execute(f"CREATE TABLE IF NOT EXISTS {table_name} ({','.join(table_columns)})")
 
-    def add_to_table(self, table_name:str, value:dict[str, "Any"]) -> None:
+    def add_to_table(self, table_name:str, value:dict[str, typing.Any]) -> None:
         try:
             self.execute(f"INSERT INTO {table_name} VALUES ({','.join('?' * len(params := tuple(map(lambda key: SQLite.to_table(value.get(key)), tuple(value.keys())))))})", params)
         except sqlite3.OperationalError as db_ex:
@@ -114,6 +114,6 @@ class SQLite():
     def delete_table_column(self, table_name:str, column:str):
         self.execute(f"ALTER TABLE {table_name} DROP COLUMN {column}")
 
-    def add_column_to_table(self, table_name:str, colunm:str, default:"Any" = None):
+    def add_column_to_table(self, table_name:str, colunm:str, default:typing.Any = None):
         self.execute(f"ALTER TABLE {table_name} ADD COLUMN {colunm}")
         self.execute(f"UPDATE {table_name} SET {colunm} = ?", (SQLite.to_table(default),))

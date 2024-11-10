@@ -1,6 +1,6 @@
 import pygame
 from Renders.Render import Render
-from GameObjects.GameObject import GameObject
+from Renders.RenderObject import RenderObject
 from Handlers.InputHandler import InputHandler
 from Utils.Vector3D import Vector3D
 from Utils.Tools import Events
@@ -16,12 +16,17 @@ if __name__ == "__main__":
     MINRENDERDISTANCE:float = 0.1
     MAXRENDERDISTANCE:float = 50.0
     CAMERASPEED:float = 0.05
+    CUBEROTATESPEED:int = 1.0
+    MOUSECAPTION:bool = True
 
     Display:pygame.Surface = pygame.display.set_mode((WIDTH, HEIGTH), pygame.DOUBLEBUF | pygame.OPENGL)
 
+    pygame.mouse.set_visible(not MOUSECAPTION)
+    pygame.event.set_grab(MOUSECAPTION)
+
     Render.setRenderProperties(ANGLE, WIDTH, HEIGTH, MINRENDERDISTANCE, MAXRENDERDISTANCE)
 
-    Render.renderContainer.addToRender(GameObject(
+    Render.renderContainer.addToRender(CUBE := RenderObject(
         [
             [-1, -1, -1],
             [1, -1, -1],
@@ -37,9 +42,10 @@ if __name__ == "__main__":
             [4, 5], [5, 6], [6, 7], [7, 4],
             [0, 4], [1, 5], [2, 6], [3, 7],
         ],
-        Vector3D(z=-5.0),
-        float(),
-        float()
+        Vector3D(z=-10.0),
+        0.0,
+        0.0,
+        1.0
         )
     )
 
@@ -48,23 +54,31 @@ if __name__ == "__main__":
         button:int = event.args[0]
         match button:
             case Buttons.KEY_W:
-                Render.camera.point.z += CAMERASPEED
+                Render.camera.position.z += CAMERASPEED
             case Buttons.KEY_S:
-                Render.camera.point.z -= CAMERASPEED
+                Render.camera.position.z -= CAMERASPEED
             case Buttons.KEY_A:
-                Render.camera.point.x += CAMERASPEED
+                Render.camera.position.x += CAMERASPEED
             case Buttons.KEY_D:
-                Render.camera.point.x -= CAMERASPEED
+                Render.camera.position.x -= CAMERASPEED
             case Buttons.KEY_LSHIFT:
-                Render.camera.point.y += CAMERASPEED
+                Render.camera.position.y += CAMERASPEED
             case Buttons.KEY_SPACE:
-                Render.camera.point.y -= CAMERASPEED
+                Render.camera.position.y -= CAMERASPEED
+            case Buttons.KEY_RIGHT:
+                CUBE.yaw += CUBEROTATESPEED
+            case Buttons.KEY_LEFT:
+                CUBE.yaw -= CUBEROTATESPEED
+            case Buttons.KEY_DOWN:
+                CUBE.pitch += CUBEROTATESPEED
+            case Buttons.KEY_UP:
+                CUBE.pitch -= CUBEROTATESPEED
             case _:
                 print(button)
 
     @InputHandler.handlerEvents.mouseMove
     def post_mouseMove(event:Events.Event) -> None:
-        ...
+        mouseX, mouseY = event.args[0]
 
     def mainLoop() -> None:
         while True:

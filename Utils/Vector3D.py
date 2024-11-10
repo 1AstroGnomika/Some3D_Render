@@ -24,12 +24,12 @@ class Vector3D:
         return Vector3D(self.x / other.x, self.y / other.y, self.z / other.z)
     
     def __eq__(self, other:"Vector3D") -> bool:
-        if type(other) == type(self):
+        if type(self) == type(other):
             return self.coordinates() == other.coordinates()
         return bool()
     
     def __repr__(self) -> str:
-        return f"(x{self.x}, y{self.y}, z{self.z})"
+        return f"Vector3D(x={self.x}, y={self.y}, z={self.z})"
     
     def copy(self) -> "Vector3D":
         return Vector3D(self.x, self.y, self.z)
@@ -49,8 +49,4 @@ class Vector3D:
         return float()
     
     def coordinates(self) -> tuple[float]:
-        return (
-            self.x,
-            self.y,
-            self.z
-        )
+        return (self.x, self.y, self.z)

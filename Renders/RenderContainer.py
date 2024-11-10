@@ -1,26 +1,26 @@
-from GameObjects.GameObject import GameObject
+from Renders.RenderObject import RenderObject
 
 class RenderContainer:
 
-    __renderObjects:dict[str, set[GameObject]]
+    __renderObjects:dict[str, set[RenderObject]]
 
     def __init__(self) -> None:
         self.__renderObjects = dict()
 
     @property
-    def renderObjects(self) -> dict[str, set[GameObject]]:
+    def renderObjects(self) -> dict[str, set[RenderObject]]:
         return self.__renderObjects
 
     @staticmethod
-    def getContainerName(gameObject:GameObject) -> str:
-        return type(gameObject).__name__
+    def getContainerName(renderObject:RenderObject) -> str:
+        return type(renderObject).__name__
 
-    def addToRender(self, gameObject:GameObject) -> None:
-        renderContainer:set[GameObject] = self.renderObjects.get(name := RenderContainer.getContainerName(gameObject))
+    def addToRender(self, renderObject:RenderObject) -> None:
+        renderContainer:set[renderObject] = self.renderObjects.get(name := RenderContainer.getContainerName(renderObject))
         if renderContainer is None:
             renderContainer = self.renderObjects.setdefault(name, set())
-        renderContainer.add(gameObject)
+        renderContainer.add(renderObject)
 
-    def removeFromRender(self, gameObject:GameObject) -> None:
-        if container := self.__renderObjects.get(RenderContainer.getContainerName(gameObject)):
-            container.discard(gameObject)
+    def removeFromRender(self, renderObject:RenderObject) -> None:
+        if container := self.__renderObjects.get(RenderContainer.getContainerName(renderObject)):
+            container.discard(renderObject)
