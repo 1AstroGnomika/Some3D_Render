@@ -1,2 +1,3 @@
-pygame
-pyopengl
+pygame==2.6.1
+pyopengl==3.1.7
+pillow==10.4.0
