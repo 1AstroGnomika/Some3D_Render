@@ -1,10 +1,5 @@
 import random
 
-class StaticClass:
-
-    def __new__(cls) -> TypeError:
-        raise TypeError(f"class instance {cls.__name__} cannot be created")
-
 class Events:
 
     class Event:
@@ -49,11 +44,11 @@ class Events:
     def __getattr__(self, name:str) -> "function":
         def decorator(func:"function") -> "function":
             event_list:list["function"] = None
-            match func.__name__.split("_").pop(0):
-                case Events.PRE_EVENTS_INDEX:
-                    event_list = self.__pre_events.get(name)
-                case Events.POST_EVENT_INDEX:
-                    event_list = self.__post_events.get(name)
+            func_name:str = func.__name__.split("_").pop(0)
+            if func_name == Events.PRE_EVENTS_INDEX:
+                event_list = self.__pre_events.get(name)
+            elif func_name == Events.POST_EVENT_INDEX:
+                event_list = self.__post_events.get(name)
             if not event_list is None:
                 event_list.append(func)
             return func

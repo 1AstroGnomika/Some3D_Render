@@ -20,9 +20,8 @@ class RenderObject:
         self.pitch = pitch
         self.yaw = yaw
         self.size = size
-
+        
     @lru_cache(maxsize=RENDER_CACHE)
-    @staticmethod
     def calculateRotationAngles(pitch:float, yaw:float) -> tuple[float, float, float, float]:
         pitch = radians(pitch)
         yaw = radians(yaw)
@@ -33,12 +32,10 @@ class RenderObject:
         return cos_pitch, sin_pitch, cos_yaw, sin_yaw
 
     @lru_cache(maxsize=RENDER_CACHE)
-    @staticmethod
     def scaleVertex(vertices:tuple[float, float, float], size:float) -> tuple[float, float, float]:
         return tuple(map(lambda value: value * size, vertices))
 
     @lru_cache(maxsize=RENDER_CACHE)
-    @staticmethod
     def rotateVertex(coordinates:tuple[float, float, float], cos_pitch:float, sin_pitch:float, cos_yaw:float, sin_yaw:float) -> tuple[float, float, float]:
         x, y, z = coordinates
         y_rotated = y * cos_pitch - z * sin_pitch
@@ -48,20 +45,12 @@ class RenderObject:
         return x_rotated, y_rotated, z_rotated_final
     
     @lru_cache(maxsize=RENDER_CACHE)
-    @staticmethod
-    def renderVector(pitch:float, yaw:float, vertice:tuple[float, float, float], size:float) -> Vector3D:
+    def renderVertex(pitch:float, yaw:float, vertice:tuple[float, float, float], size:float) -> Vector3D:
         cos_pitch, sin_pitch, cos_yaw, sin_yaw = RenderObject.calculateRotationAngles(pitch, yaw)
         scaled_vector = RenderObject.scaleVertex(vertice, max(size, float()))
         rotated_vector = RenderObject.rotateVertex(scaled_vector, cos_pitch, sin_pitch, cos_yaw, sin_yaw)
-        return Vector3D(*rotated_vector)
+        return rotated_vector
     
-    @lru_cache(maxsize=RENDER_CACHE)
-    @staticmethod
-    def checkVectorDistance(fromPos:tuple[float, float, float], toPos:tuple[float, float, float], minDistance:float, maxDistance:float) -> bool:
-        distance:float = Vector3D(*fromPos).distance(Vector3D(*toPos))
-        return distance >= minDistance and distance <= maxDistance
-
-    def renderVectors(self) -> Iterable[Vector3D]:
+    def renderVectors(self) -> Iterable[Iterable[Vector3D]]:
         for edge in self.edges:
-            for vertex_index in edge:
-                yield RenderObject.renderVector(self.pitch, self.yaw, self.vertices[vertex_index], self.size)
+            yield map(lambda vertexIndex: Vector3D(*RenderObject.renderVertex(self.pitch, self.yaw, self.vertices[vertexIndex], self.size)), edge)

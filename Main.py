@@ -1,31 +1,31 @@
 import pygame
-from Renders.Render import Render
-from Renders.RenderObject import RenderObject
-from Handlers.InputHandler import InputHandler
+from Game import Game
+from App.SoftwareApp import SoftwareApp
+from Render.RenderObject import RenderObject
+from Handler.InputHandler import InputHandler
+from Handler.EventHandler import EventHandler
 from Utils.Vector3D import Vector3D
 from Utils.Tools import Events
-from Keys import Buttons
+from Constants import Buttons
 
 if __name__ == "__main__":
 
-    pygame.init()
-
-    ANGLE:float = 50.0
-    WIDTH:int = 800
-    HEIGTH:int = 600
+    ALPHA:float = 1.0
+    WIDTH:int = 1024
+    HEIGTH:int = 768
     MINRENDERDISTANCE:float = 0.1
     MAXRENDERDISTANCE:float = 50.0
     CAMERASPEED:float = 0.05
     CUBEROTATESPEED:int = 1.0
     MOUSECAPTION:bool = True
 
-    Display:pygame.Surface = pygame.display.set_mode((WIDTH, HEIGTH), pygame.DOUBLEBUF | pygame.OPENGL)
-
+    pygame.init()
     pygame.mouse.set_visible(not MOUSECAPTION)
     pygame.event.set_grab(MOUSECAPTION)
 
-    Render.setRenderProperties(ANGLE, WIDTH, HEIGTH, MINRENDERDISTANCE, MAXRENDERDISTANCE)
-    Render.renderContainer.addToRender(CUBE := RenderObject(
+    game:Game = Game(SoftwareApp(ALPHA, WIDTH, HEIGTH, MINRENDERDISTANCE, MAXRENDERDISTANCE), 60)
+
+    game.app.render.renderContainer.addToRender(CUBE := RenderObject(
         [
             (-1, -1, -1),
             (1, -1, -1),
@@ -51,45 +51,49 @@ if __name__ == "__main__":
     @InputHandler.handlerEvents.buttonPressed
     def post_buttonPressed(event:Events.Event) -> None:
         button:int = event.args[0]
-        match button:
-            case Buttons.KEY_W:
-                Render.camera.position.z += CAMERASPEED
-            case Buttons.KEY_S:
-                Render.camera.position.z -= CAMERASPEED
-            case Buttons.KEY_A:
-                Render.camera.position.x += CAMERASPEED
-            case Buttons.KEY_D:
-                Render.camera.position.x -= CAMERASPEED
-            case Buttons.KEY_LSHIFT:
-                Render.camera.position.y += CAMERASPEED
-            case Buttons.KEY_SPACE:
-                Render.camera.position.y -= CAMERASPEED
-            case Buttons.KEY_RIGHT:
-                CUBE.yaw += CUBEROTATESPEED
-            case Buttons.KEY_LEFT:
-                CUBE.yaw -= CUBEROTATESPEED
-            case Buttons.KEY_DOWN:
-                CUBE.pitch += CUBEROTATESPEED
-            case Buttons.KEY_UP:
-                CUBE.pitch -= CUBEROTATESPEED
-            case Buttons.KEY_NUM_PLUS:
-                CUBE.size += CUBEROTATESPEED
-            case Buttons.KEY_NUM_MINUS:
-                CUBE.size -= CUBEROTATESPEED    
-            case _:
-                print(button)
+        if button == Buttons.KEY_W:
+             game.app.render.camera.position.z += CAMERASPEED
+        elif button == Buttons.KEY_S:
+             game.app.render.camera.position.z -= CAMERASPEED
+        elif button == Buttons.KEY_A:
+             game.app.render.camera.position.x += CAMERASPEED
+        elif button == Buttons.KEY_D:
+             game.app.render.camera.position.x -= CAMERASPEED
+        elif button == Buttons.KEY_LSHIFT:
+             game.app.render.camera.position.y += CAMERASPEED
+        elif button == Buttons.KEY_SPACE:
+             game.app.render.camera.position.y -= CAMERASPEED 
+        elif button == Buttons.KEY_RIGHT:
+             CUBE.yaw += CUBEROTATESPEED
+        elif button == Buttons.KEY_LEFT:
+             CUBE.yaw -= CUBEROTATESPEED
+        elif button == Buttons.KEY_DOWN:
+             CUBE.pitch += CUBEROTATESPEED
+        elif button == Buttons.KEY_UP:
+            CUBE.pitch -= CUBEROTATESPEED
+        elif button == Buttons.KEY_NUM_PLUS:
+            CUBE.size += CUBEROTATESPEED
+        elif button == Buttons.KEY_NUM_MINUS:
+            CUBE.size -= CUBEROTATESPEED
+        elif button == Buttons.KEY_ESC:
+            game.app.running = not game.app.running
+        else:
+            print(button)
 
     @InputHandler.handlerEvents.mouseMove
     def post_mouseMove(event:Events.Event) -> None:
         mouseX, mouseY = event.args[0]
+        centerX, centerY = game.app.render.width // 2, game.app.render.height // 2
+        shiftX, shiftY = centerX - mouseX, centerY - mouseY
+        game.app.render.camera.viewRotation.x += shiftX / 1000
+        game.app.render.camera.viewRotation.y += shiftY / 1000
+        pygame.mouse.set_pos((centerX, centerY))
 
-    def mainLoop() -> None:
-        while True:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    exit()
-            InputHandler.handle(pygame.mouse.get_pos(), tuple(pygame.key.get_pressed()))
-            Render.render()
-            pygame.display.flip()
-    
-    mainLoop()
+    @EventHandler.handlerEvents.handleEvent
+    def post_event(event:Events.Event) -> None:
+        pygameEvent:pygame.event.Event = event.args[0]
+        if pygameEvent.type == pygame.QUIT:
+            game.app.running = not game.app.running
+
+    while game.app.running:
+        game.update()

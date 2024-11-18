@@ -1,4 +1,4 @@
-from Renders.RenderObject import RenderObject
+from Render.RenderObject import RenderObject
 
 class RenderContainer:
 
