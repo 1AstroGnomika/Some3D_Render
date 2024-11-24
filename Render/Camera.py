@@ -2,13 +2,13 @@ from Utils.Vector3D import Vector3D
 
 class Camera:
 
-    viewRotation:Vector3D
     position:Vector3D
+    rotation:Vector3D
     __lastCameraPosition:Vector3D
 
-    def __init__(self, viewRotation:Vector3D, position:Vector3D) -> None:
-        self.viewRotation = viewRotation
+    def __init__(self, position:Vector3D) -> None:
         self.position = position
+        self.rotation = Vector3D()
         self.__lastCameraPosition = Vector3D()
 
     def positionShift(self) -> Vector3D:

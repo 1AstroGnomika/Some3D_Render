@@ -1,5 +1,7 @@
 KEY_A:int = 4
 KEY_D:int = 7
+KEY_E:int = 8
+KEY_Q:int = 20
 KEY_S:int = 22
 KEY_W:int = 26
 KEY_ESC:int = 41

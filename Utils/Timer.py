@@ -13,15 +13,18 @@ class Timer:
     MILLISECONDS_IN_SECOND:int = SECOND / MILLISECOND
     lastTotalSeconds:float
     ticksPerSecond:float
+    lastTicks:float
 
     def __init__(self, ticksPerSecond:float = 1000):
         self.lastTotalSeconds = Timer.getTotalSeconds()
         self.ticksPerSecond = ticksPerSecond
+        self.lastTicks = float()
 
     def ticks(self) -> float:
         oLastTotalSeconds = self.lastTotalSeconds
         self.lastTotalSeconds = Timer.getTotalSeconds()
-        return ((self.lastTotalSeconds - oLastTotalSeconds) / self.SECOND) * self.ticksPerSecond
+        self.lastTicks = ((self.lastTotalSeconds - oLastTotalSeconds) / self.SECOND) * self.ticksPerSecond
+        return self.lastTicks
     
     @staticmethod
     def getTotalSeconds() -> float:
