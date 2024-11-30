@@ -1,28 +1,51 @@
 
 import pygame
-from Handler.AbstarctHandler import AbstarctHandler
+from Handler.EventHandler import EventHandler
+from Utils.Tools import Events
 
-class InputHandler(AbstarctHandler):
+class InputHandler(EventHandler):
 
-    @AbstarctHandler.handlerEvents
+    @EventHandler.handlerEvents
     def handle() -> None:
         InputHandler.handleMouse(pygame.mouse.get_pos())
         InputHandler.handleButtons(pygame.key.get_pressed())
 
-    @AbstarctHandler.handlerEvents
+    @EventHandler.handlerEvents
     def handleButtons(buttons:tuple[int]) -> None:
         for button, pressed in enumerate(buttons):
             if pressed:
                 InputHandler.buttonPressed(button)
 
-    @AbstarctHandler.handlerEvents
-    def handleMouse(mousePosition:tuple[float]) -> None:
+    @EventHandler.handlerEvents
+    def handleMouse(mousePosition:tuple[float, float]) -> None:
         InputHandler.mouseMove(mousePosition)
 
-    @AbstarctHandler.handlerEvents
+    @EventHandler.handlerEvents
     def buttonPressed(button:int) -> None:
         ...
 
-    @AbstarctHandler.handlerEvents
-    def mouseMove(mousePosition:tuple[float]) -> None:
+    @EventHandler.handlerEvents
+    def mouseMove(mousePosition:tuple[float, float]) -> None:
         ...
+
+    @EventHandler.handlerEvents
+    def mouseShift(mouseShift:tuple[float, float]) -> None:
+        ...
+
+    @EventHandler.handlerEvents
+    def mouseButtonDown(button:int) -> None:
+        ...
+
+    @EventHandler.handlerEvents
+    def mouseButtonUp(button:int) -> None:
+        ...
+
+    @EventHandler.handlerEvents.handleEvent
+    def post_handleEvent(event:Events.Event) -> None:
+        pygameEvent:pygame.event.Event = event.args[0]
+        if pygameEvent.type == pygame.MOUSEMOTION:
+            InputHandler.mouseShift(pygameEvent.rel)
+        elif pygameEvent.type == pygame.MOUSEBUTTONDOWN:
+            InputHandler.mouseButtonDown(pygameEvent.button)
+        elif pygameEvent.type == pygame.MOUSEBUTTONUP:
+            InputHandler.mouseButtonUp(pygameEvent.button)

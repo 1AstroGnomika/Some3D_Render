@@ -13,5 +13,5 @@ class EventHandler(AbstarctHandler):
             EventHandler.handleEvent(event)
 
     @AbstarctHandler.handlerEvents
-    def handleEvent(events:pygame.event.Event) -> None:
+    def handleEvent(event:pygame.event.Event) -> None:
         ...
