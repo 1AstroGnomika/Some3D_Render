@@ -21,7 +21,7 @@ class RenderObject:
         self.pitch = pitch
         self.yaw = yaw
         self.roll = roll
-        self.size = size
+        self.size = size        
 
     @lru_cache(maxsize=RENDER_CACHE)
     def calculateRadians(pitch:float, yaw:float, roll:float) -> tuple[float, float, float]:

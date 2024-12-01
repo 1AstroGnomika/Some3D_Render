@@ -29,11 +29,15 @@ class AbstractRender(ABC):
     def drawAll(self) -> None:
         for renderObjects in tuple(self.renderContainer.renderObjects.values()):
             for renderObject in iter(renderObjects):
+                screenX, screenY = RenderObject.screenVertex(self.width, self.height, self.angle, self.camera.rotation.x, self.camera.rotation.y, self.camera.rotation.z, self.viewVector(renderObject.point).coordinates())
                 distance:float = self.camera.position.distance(renderObject.point)
                 checkDistance:bool = distance >= self.minRenderDistance and distance <= self.maxRenderDistance
-                checkVisible:bool = True#RenderObject.vertex(self.camera.rotation.y, self.camera.rotation.x, self.camera.rotation.z, (self.camera.position - renderObject.point).coordinates(), renderObject.size)[-1] >= float()
+                checkVisible:bool = screenX > float() and screenX < self.width and screenY > float() and screenY < self.height
                 if checkDistance and checkVisible:
                     self.draw(renderObject)
+
+    def viewVector(self, vertex:Vector3D) -> Vector3D:
+        return vertex - self.camera.position
     
     @abstractmethod
     def draw(self, renderObject:RenderObject) -> None: ...

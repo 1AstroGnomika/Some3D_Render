@@ -1,31 +1,32 @@
 import random
+from typing import Any, Callable
 
 class Events:
 
     class Event:
 
-        func:"function"
-        args:"any"
-        kwargs:"any"
+        func:Callable
+        args:Any
+        kwargs:Any
 
-        def __init__(self, func:"function", *args, **kwargs) -> None:
+        def __init__(self, func:Callable, *args, **kwargs) -> None:
             self.func = func
             self.args = args
             self.kwargs = kwargs
 
-        def __call__(self) -> "any":
+        def __call__(self) -> Any:
             return self.func(*self.args, **self.kwargs)
     
     PRE_EVENTS_INDEX:str = "pre"
     POST_EVENT_INDEX:str = "post"
-    __pre_events:dict[str, list["function"]]
-    __post_events:dict[str, list["function"]]
+    __pre_events:dict[str, list[Callable]]
+    __post_events:dict[str, list[Callable]]
     
     def __init__(self) -> None:
         self.__pre_events = dict()
         self.__post_events = dict()
         
-    def __call__(self, func:"function") -> "function":
+    def __call__(self, func:Callable) -> Callable:
         name:str = func.__name__
         for event_list in (
             self.__pre_events,
@@ -41,9 +42,9 @@ class Events:
             return result
         return decorator
           
-    def __getattr__(self, name:str) -> "function":
-        def decorator(func:"function") -> "function":
-            event_list:list["function"] = None
+    def __getattr__(self, name:str) -> Callable:
+        def decorator(func:Callable) -> Callable:
+            event_list:list[Callable] = None
             func_name:str = func.__name__.split("_").pop(0)
             if func_name == Events.PRE_EVENTS_INDEX:
                 event_list = self.__pre_events.get(name)

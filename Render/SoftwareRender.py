@@ -10,11 +10,7 @@ class SoftwareRender(AbstractRender):
 
     def draw(self, renderObject:RenderObject) -> None:
         for vectors in renderObject.vectors():
-            polygons:list[tuple[int, int]] = list()
-            for x, y in map(lambda screen_position: screen_position, map(lambda vertex: RenderObject.screenVertex(self.width, self.height, self.angle, self.camera.rotation.x, self.camera.rotation.y, self.camera.rotation.z, vertex.coordinates()), map(lambda vertex: self.camera.position - (renderObject.point - vertex), vectors))):
-                if x or y:
-                    polygons.append((round(x), round(y)))
-            if len(polygons) > 1:
+            if len(polygons := tuple(filter(any, map(lambda screen_position: tuple(map(round, screen_position)), map(lambda vertex: RenderObject.screenVertex(self.width, self.height, self.angle, self.camera.rotation.x, self.camera.rotation.y, self.camera.rotation.z, vertex.coordinates()), map(lambda vertex: self.viewVector(renderObject.point - vertex), vectors)))))) > 1:
                 pygame.draw.polygon(self.display, Colors.WHITE, polygons, int(renderObject.size))
 
     def render(self) -> None:
