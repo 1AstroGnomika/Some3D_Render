@@ -28,13 +28,11 @@ if __name__ == "__main__":
 
     GameLogic.App = SoftwareApp(FRAMES, ANGLE, WIDTH, HEIGTH, MINRENDERDISTANCE, MAXRENDERDISTANCE)
     
-    GameLogic.App.render.renderContainer.addToRender(CUBE := RenderObject(
+    GameLogic.App.render.renderContainer.addToRender(OBJECT := RenderObject(
         *GeometryGenerator.sphere(1, 25, 25),
-        Vector3D(z=-0.0),
-        0.0,
-        0.0,
-        0.0,
-        1.0
+        1.0,
+        Vector3D(z=10.0),
+        Vector3D(),
         )
     )
 
@@ -46,47 +44,55 @@ if __name__ == "__main__":
         camera_rotation_speed:float = CAMERAROTATIONSPEED * ticks
         cube_rotation_speed:float = CUBEROTATESPEED * ticks
         cos_yaw, sin_yaw, cos_pitch, sin_pitch, cos_roll, sin_roll = RenderObject.calculateAngles(*GameLogic.App.render.camera.rotation.coordinates())
+        multiple:Vector3D = Vector3D(camera_speed, camera_speed, camera_speed)
+        forvard:Vector3D = GameLogic.App.render.camera.forvard * multiple
+        right:Vector3D = GameLogic.App.render.camera.right * multiple
+        up:Vector3D = GameLogic.App.render.camera.up * multiple
         if button == Buttons.KEY_W:
-             GameLogic.App.render.camera.position.z += camera_speed * cos_yaw
-             GameLogic.App.render.camera.position.y += camera_speed * sin_pitch
-             GameLogic.App.render.camera.position.x -= camera_speed * sin_yaw
+            GameLogic.App.render.camera.point.x += forvard.x
+            GameLogic.App.render.camera.point.y += forvard.y
+            GameLogic.App.render.camera.point.z += forvard.z
         elif button == Buttons.KEY_S:
-             GameLogic.App.render.camera.position.z -= camera_speed * cos_yaw
-             GameLogic.App.render.camera.position.y -= camera_speed * sin_pitch
-             GameLogic.App.render.camera.position.x += camera_speed * sin_yaw
+             GameLogic.App.render.camera.point.x -= forvard.x
+             GameLogic.App.render.camera.point.y -= forvard.y
+             GameLogic.App.render.camera.point.z -= forvard.z
         elif button == Buttons.KEY_A:
-             GameLogic.App.render.camera.position.z -= camera_speed * sin_yaw
-             GameLogic.App.render.camera.position.y -= camera_speed * sin_roll
-             GameLogic.App.render.camera.position.x -= camera_speed * cos_yaw
+             GameLogic.App.render.camera.point.x -= right.x
+             GameLogic.App.render.camera.point.y -= right.y
+             GameLogic.App.render.camera.point.z -= right.z
         elif button == Buttons.KEY_D:
-             GameLogic.App.render.camera.position.z += camera_speed * sin_yaw
-             GameLogic.App.render.camera.position.y += camera_speed * sin_roll
-             GameLogic.App.render.camera.position.x += camera_speed * cos_yaw
+             GameLogic.App.render.camera.point.x += right.x
+             GameLogic.App.render.camera.point.y += right.y
+             GameLogic.App.render.camera.point.z += right.z
         elif button == Buttons.KEY_LSHIFT:
-            GameLogic.App.render.camera.position.y -= camera_speed
+             GameLogic.App.render.camera.point.x -= up.x
+             GameLogic.App.render.camera.point.y -= up.y
+             GameLogic.App.render.camera.point.z -= up.z
         elif button == Buttons.KEY_SPACE:
-             GameLogic.App.render.camera.position.y += camera_speed
+             GameLogic.App.render.camera.point.x += up.x
+             GameLogic.App.render.camera.point.y += up.y
+             GameLogic.App.render.camera.point.z += up.z
         elif button == Buttons.KEY_Q:
             GameLogic.App.render.camera.rotation.z += camera_rotation_speed
         elif button == Buttons.KEY_E:
             GameLogic.App.render.camera.rotation.z -= camera_rotation_speed
         elif button == Buttons.KEY_RIGHT:
-             CUBE.yaw += cube_rotation_speed
+             OBJECT.rotation.y -= cube_rotation_speed
         elif button == Buttons.KEY_LEFT:
-             CUBE.yaw -= cube_rotation_speed
+             OBJECT.rotation.y += cube_rotation_speed
         elif button == Buttons.KEY_DOWN:
-             CUBE.pitch += cube_rotation_speed
+             OBJECT.rotation.x -= cube_rotation_speed
         elif button == Buttons.KEY_UP:
-            CUBE.pitch -= cube_rotation_speed
+            OBJECT.rotation.x += cube_rotation_speed
         elif button == Buttons.KEY_NUM_PLUS:
-            CUBE.size += cube_rotation_speed
+            OBJECT.size += cube_rotation_speed
         elif button == Buttons.KEY_NUM_MINUS:
-            CUBE.size -= cube_rotation_speed
+            OBJECT.size -= cube_rotation_speed
         elif button == Buttons.KEY_ESC:
             GameLogic.App.running = not GameLogic.App.running
         else:
             print(button)
-        print(GameLogic.App.render.camera.position)
+        print(GameLogic.App.render.camera.point)
 
     @InputHandler.handlerEvents.mouseShift
     def post_mouseShift(event: Events.Event) -> None:

@@ -4,6 +4,7 @@ from Render.RenderContainer import RenderContainer
 from Render.Camera import Camera
 from Utils.Vector3D import Vector3D
 from abc import ABC, abstractmethod
+from typing import Optional
 
 class AbstractRender(ABC):
     
@@ -22,22 +23,25 @@ class AbstractRender(ABC):
         self.height = height
         self.minRenderDistance = minRenderDistance
         self.maxRenderDistance = maxRenderDistance
-        self.camera = Camera(Vector3D())
+        self.camera = Camera(Vector3D(), Vector3D())
         self.renderContainer = RenderContainer()
         self.initRender()
     
     def drawAll(self) -> None:
         for renderObjects in tuple(self.renderContainer.renderObjects.values()):
             for renderObject in iter(renderObjects):
-                screenX, screenY = RenderObject.screenVertex(self.width, self.height, self.angle, self.camera.rotation.x, self.camera.rotation.y, self.camera.rotation.z, self.viewVector(renderObject.point).coordinates())
-                distance:float = self.camera.position.distance(renderObject.point)
+                distance:float = self.camera.point.distance(renderObject.point)
                 checkDistance:bool = distance >= self.minRenderDistance and distance <= self.maxRenderDistance
-                checkVisible:bool = screenX > float() and screenX < self.width and screenY > float() and screenY < self.height
+                checkVisible:bool = self.onScreen(RenderObject.screenVertex(self.width, self.height, self.angle, self.camera.rotation.x, self.camera.rotation.y, self.camera.rotation.z, self.viewVector(renderObject.point).coordinates()))
                 if checkDistance and checkVisible:
                     self.draw(renderObject)
 
     def viewVector(self, vertex:Vector3D) -> Vector3D:
-        return vertex - self.camera.position
+        return vertex - self.camera.point
+    
+    def onScreen(self, screenVertex:tuple[float, float]) -> bool:
+        screenX, screenY = screenVertex
+        return screenX >= float() and screenX <= self.width and screenY >= float() and screenY <= self.height
     
     @abstractmethod
     def draw(self, renderObject:RenderObject) -> None: ...

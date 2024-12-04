@@ -1,45 +1,25 @@
 from functools import lru_cache
-from math import radians, sin, cos
 from typing import Iterable
 from Utils.Vector3D import Vector3D
+from Render.Transform import Transform
 
-class RenderObject:
+class RenderObject(Transform):
 
-    RENDER_CACHE:int = 2048
     vertices:list[tuple[float]]
     edges:list[tuple[int]]
-    point:Vector3D
-    pitch:float
-    yaw:float
-    roll:float
     size:float
 
-    def __init__(self, vertices:list[tuple[float]], edges:list[tuple[int]], point:Vector3D, pitch:float, yaw:float, roll:float, size:float) -> None:
+    def __init__(self, vertices:list[tuple[float]], edges:list[tuple[int]], size:float, point:Vector3D, rotation:Vector3D) -> None:
         self.vertices = vertices
         self.edges = edges
-        self.point = point
-        self.pitch = pitch
-        self.yaw = yaw
-        self.roll = roll
-        self.size = size        
+        self.size = size
+        super().__init__(point, rotation)
 
-    @lru_cache(maxsize=RENDER_CACHE)
-    def calculateRadians(pitch:float, yaw:float, roll:float) -> tuple[float, float, float]:
-        return radians(pitch), radians(yaw), radians(roll)
-    
-    @lru_cache(maxsize=RENDER_CACHE)
-    def calculateAngles(pitch:float, yaw:float, roll:float) -> tuple[float, float, float, float, float, float]:
-        return cos(pitch), sin(pitch), cos(yaw), sin(yaw), cos(roll), sin(roll)
-
-    @lru_cache(maxsize=RENDER_CACHE)
-    def calculateRotationAngles(pitch:float, yaw:float, roll:float) -> tuple[float, float, float, float, float, float]:
-        return RenderObject.calculateAngles(*RenderObject.calculateRadians(pitch, yaw, roll))
-
-    @lru_cache(maxsize=RENDER_CACHE)
+    @lru_cache(maxsize=Transform.TRANSFORM_CACHE)
     def scaleVertex(vertices:tuple[float, float, float], size:float) -> tuple[float, float, float]:
         return tuple(map(lambda value: value * size, vertices))
 
-    @lru_cache(maxsize=RENDER_CACHE)
+    @lru_cache(maxsize=Transform.TRANSFORM_CACHE)
     def rotateVertex(coordinates:tuple[float, float, float], cos_pitch:float, sin_pitch:float, cos_yaw:float, sin_yaw:float, cos_roll:float, sin_roll:float) -> tuple[float, float, float]:
         x, y, z = coordinates
         x_rotated = x * cos_roll - y * sin_roll
@@ -51,16 +31,16 @@ class RenderObject:
         z_final = -x_rotated * sin_yaw + z_rotated_final * cos_yaw
         return x_final, y_rotated_final, z_final
 
-    @lru_cache(maxsize=RENDER_CACHE)
+    @lru_cache(maxsize=Transform.TRANSFORM_CACHE)
     def vertex(pitch:float, yaw:float, roll:float, vertex:tuple[float, float, float], size:float) -> Vector3D:
         scaled_vector = RenderObject.scaleVertex(vertex, max(size, float()))
-        rotated_vector = RenderObject.rotateVertex(scaled_vector, *RenderObject.calculateRotationAngles(pitch, yaw, roll))
+        rotated_vector = RenderObject.rotateVertex(scaled_vector, *Transform.calculateRotationAngles(pitch, yaw, roll))
         return rotated_vector
     
-    @lru_cache(maxsize=RENDER_CACHE)
+    @lru_cache(maxsize=Transform.TRANSFORM_CACHE)
     def screenVertex(screenWidth:float, screenHeight:float, angle:float, pitch:float, yaw:float, roll:float, vertex:tuple[float, float, float]) -> tuple[float, float]:
         x, y, z = vertex
-        cos_yaw, sin_yaw, cos_pitch, sin_pitch, cos_roll, sin_roll = RenderObject.calculateAngles(pitch, yaw, roll)
+        cos_yaw, sin_yaw, cos_pitch, sin_pitch, cos_roll, sin_roll = Transform.calculateAngles(pitch, yaw, roll)
         screen_center_x = screenWidth // 2
         screen_center_y = screenHeight // 2
         aspect_ratio = angle * (screen_center_x / screen_center_y)
@@ -71,8 +51,8 @@ class RenderObject:
             screen_x = screen_center_x + (x / z) * aspect_ratio * screen_center_x
             screen_y = screen_center_y - (y / z) * aspect_ratio * screen_center_y
             return screen_x, screen_y
-        return float(), float()
+        return float("inf"), float("inf")
 
-    def vectors(self) -> Iterable[Iterable[Vector3D]]:
+    def vectorVertices(self) -> Iterable[Iterable[Vector3D]]:
         for edge in self.edges:
-            yield map(lambda vertexIndex: Vector3D(*RenderObject.vertex(self.pitch, self.yaw, self.roll, self.vertices[vertexIndex], self.size)), edge)
+            yield map(lambda vertexIndex: Vector3D(*RenderObject.vertex(*self.rotation.coordinates(), self.vertices[vertexIndex], self.size)), edge)
