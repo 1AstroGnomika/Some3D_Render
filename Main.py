@@ -6,7 +6,7 @@ from Render.GeometryGenerator import GeometryGenerator
 from Handler.InputHandler import InputHandler
 from Handler.EventHandler import EventHandler
 from Utils.Vector3D import Vector3D
-from Utils.Tools import Events, limiter
+from Utils.Tools import Events
 from Constants import Buttons
 
 if __name__ == "__main__":
@@ -102,7 +102,7 @@ if __name__ == "__main__":
             GameLogic.App.render.camera.rotation.x -= rotX
             GameLogic.App.render.camera.rotation.y -= rotY
             if MOUSECAPTION:
-                pygame.mouse.set_pos((GameLogic.App.render.width // 2, GameLogic.App.render.height // 2))
+                pygame.mouse.set_pos((GameLogic.App.render.camera.width // 2, GameLogic.App.render.camera.height // 2))
 
     @EventHandler.handlerEvents.handleEvent
     def post_event(event:Events.Event) -> None:

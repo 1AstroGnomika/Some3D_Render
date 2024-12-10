@@ -4,7 +4,7 @@ from Utils.Vector3D import Vector3D
 
 class Transform:
 
-    TRANSFORM_CACHE:int = 4096
+    TRANSFORM_CACHE:int = 256
     point:Vector3D
     rotation:Vector3D
     __lastPoint:Vector3D

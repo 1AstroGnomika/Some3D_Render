@@ -2,6 +2,7 @@ from pygame.time import Clock
 from Utils.Timer import Timer
 from typing import Type
 from Render.AbstractRender import AbstractRender
+from Render.Camera import Camera
 from Handler.InputHandler import InputHandler
 from Handler.EventHandler import EventHandler
 from abc import ABC, abstractmethod
@@ -16,7 +17,7 @@ class AbstractApp(ABC):
     def __init__(self, frames:float, *args, **kwargs) -> None:
         self.timer = Timer(frames)
         self.pygameTimer = Clock()
-        self.render = self.getRender()(*args, **kwargs)
+        self.render = self.getRender()(Camera(*args, **kwargs))
     
     def update(self) -> None:
         self.timer.ticks()
