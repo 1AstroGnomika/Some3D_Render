@@ -22,7 +22,7 @@ class GeometryGenerator:
                 edges.append((current, next_horizontal))
                 if i < rings:
                     edges.append((current, next_vertical))
-        return vertices, edges
+        return tuple(vertices), tuple(edges)
 
     @staticmethod
     def cube(size: float):
@@ -36,7 +36,7 @@ class GeometryGenerator:
             (4, 5), (5, 6), (6, 7), (7, 4),
             (0, 4), (1, 5), (2, 6), (3, 7)
         ]
-        return vertices, edges
+        return tuple(vertices), tuple(edges)
     
     @staticmethod
     def cubic_lattice(size: float, divisions: int):
@@ -57,7 +57,7 @@ class GeometryGenerator:
                     if k < divisions: edges.append((current, current + 1))
                     if j < divisions: edges.append((current, current + (divisions + 1)))
                     if i < divisions: edges.append((current, current + (divisions + 1) ** 2))
-        return vertices, edges
+        return tuple(vertices), tuple(edges)
 
     @staticmethod
     def cylinder(radius: float, height: float, segments: int):
@@ -73,7 +73,7 @@ class GeometryGenerator:
             edges.append((i * 2, ((i + 1) % segments) * 2))
             edges.append((i * 2 + 1, ((i + 1) % segments) * 2 + 1))
             edges.append((i * 2, i * 2 + 1))
-        return vertices, edges
+        return tuple(vertices), tuple(edges)
 
     @staticmethod
     def cone(radius: float, height: float, segments: int):
@@ -88,7 +88,7 @@ class GeometryGenerator:
             edges.append((0, i + 1))
         for i in range(segments):
             edges.append((i + 1, ((i + 1) % segments) + 1))
-        return vertices, edges
+        return tuple(vertices), tuple(edges)
 
     @staticmethod
     def torus(radius: float, tube_radius: float, segments: int, rings: int):
@@ -109,4 +109,27 @@ class GeometryGenerator:
                 next_segment = i * segments + (j + 1) % segments
                 edges.append((current, next_ring))
                 edges.append((current, next_segment))
-        return vertices, edges
+        return tuple(vertices), tuple(edges)
+    
+    @staticmethod
+    def grid(width: float, height: float, rows: int, cols: int):
+        vertices = []
+        edges = []
+        dx = width / cols
+        dy = height / rows
+        x_start = -width / 2
+        y_start = -height / 2
+        for i in range(rows + 1):
+            for j in range(cols + 1):
+                x = x_start + j * dx
+                y = y_start + i * dy
+                vertices.append((x, y, 0))
+        for i in range(rows + 1):
+            for j in range(cols):
+                current = i * (cols + 1) + j
+                edges.append((current, current + 1))
+        for i in range(rows):
+            for j in range(cols + 1):
+                current = i * (cols + 1) + j
+                edges.append((current, current + cols + 1))
+        return tuple(vertices), tuple(edges)
