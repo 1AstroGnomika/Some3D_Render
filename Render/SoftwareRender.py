@@ -14,10 +14,10 @@ class SoftwareRender(AbstractRender):
         for edge in renderObject.edges:
             polygons:list[tuple[int, int]] = list()
             for index in edge:
-                screenX, screenY, screenZ = RenderObject.calculateScreenProjection(self.camera.width, self.camera.height, self.camera.angle, self.camera.rotation.x, self.camera.rotation.y, self.camera.rotation.z, self.camera.viewVector(renderObject.point - Vector3D(*vertices[index])).coordinates())
-                if screenZ > float():
-                    if screenX >= float() and screenX <= self.camera.width and screenY >= float() and screenY <= self.camera.height:
-                        polygons.append((round(screenX), round(screenY)))
+                surfaceVector:Vector3D = self.camera.surfaceProjection(renderObject.point - Vector3D(*vertices[index]))
+                if surfaceVector.z > float():
+                    if surfaceVector.x >= float() and surfaceVector.x <= self.camera.width and surfaceVector.y >= float() and surfaceVector.y <= self.camera.height:
+                        polygons.append((round(surfaceVector.x), round(surfaceVector.y)))
                 else:
                     break
             if len(polygons) > 1:
