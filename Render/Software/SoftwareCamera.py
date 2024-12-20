@@ -1,28 +1,19 @@
 from functools import lru_cache
 from Utils.Vector3D import Vector3D
-from Render.Transform import Transform
-from Render.RenderObject import RenderObject
+from Render.AbstractCamera import AbstractCamera
+from Render.Software.SoftwareRenderObject import SoftwareRenderObject
 
-class Camera(Transform):
-    
-    angle:float
-    width:int
-    height:int
-    minRenderDistance:float
-    maxRenderDistance:float
+class SoftwareCamera(AbstractCamera):
 
-    def __init__(self, angle:float, width:int, height:int, minRenderDistance:float, maxRenderDistance:float, point:Vector3D=None, rotation:Vector3D=None) -> None:
-        self.angle = angle
-        self.width = width
-        self.height = height
-        self.minRenderDistance = minRenderDistance
-        self.maxRenderDistance = maxRenderDistance
-        super().__init__(point or Vector3D(), rotation or Vector3D())
+    def __call__(self, renderObject:SoftwareRenderObject) -> SoftwareRenderObject:
+        if self.visible(renderObject):
+            return renderObject
+        return None
 
-    @lru_cache(maxsize=Transform.TRANSFORM_CACHE)
+    @lru_cache(maxsize=SoftwareRenderObject.SOFTWARE_RENDER_CACHE)
     def calculateSurfaceProjection(screenWidth:float, screenHeight:float, angle:float, pitch:float, yaw:float, roll:float, vertex:tuple[float, float, float]) -> tuple[float, float, float]:
         x, y, z = vertex
-        cos_pitch, sin_pitch, cos_yaw, sin_yaw, cos_roll, sin_roll = Transform.calculateAngles(pitch, yaw, roll)
+        cos_pitch, sin_pitch, cos_yaw, sin_yaw, cos_roll, sin_roll = SoftwareRenderObject.calculateAngles(pitch, yaw, roll)
         screen_center_x = screenWidth // 2
         screen_center_y = screenHeight // 2
         aspect_ratio = angle * (screen_center_x / screen_center_y)
@@ -37,11 +28,11 @@ class Camera(Transform):
     def viewVector(self, vertex:Vector3D) -> Vector3D:
         return vertex - self.point
     
-    def visible(self, renderObject:RenderObject) -> bool:
+    def visible(self, renderObject:SoftwareRenderObject) -> bool:
         distance:float = self.point.distance(renderObject.point)
         if distance >= self.minRenderDistance and distance <= self.maxRenderDistance:
-            width, height, depth = renderObject.dimensions
-            screenX, screenY, screenZ = Camera.calculateSurfaceProjection(self.width, self.height, self.angle, self.rotation.x, self.rotation.y, self.rotation.z, self.viewVector(renderObject.point).coordinates())
+            width, height, depth = renderObject.dimensions()
+            screenX, screenY, screenZ = SoftwareCamera.calculateSurfaceProjection(self.width, self.height, self.angle, self.rotation.x, self.rotation.y, self.rotation.z, self.viewVector(renderObject.point).coordinates())
             if screenZ > float():
                 screenSizeX:float = ((self.width * width / screenZ) * self.angle) / 2
                 screenSizeY:float = ((self.height * height / screenZ) * self.angle) / 2
@@ -50,4 +41,4 @@ class Camera(Transform):
         return bool()
     
     def surfaceProjection(self, vertex:Vector3D) -> Vector3D:
-        return Vector3D(*Camera.calculateSurfaceProjection(self.width, self.height, self.angle, self.rotation.x, self.rotation.y, self.rotation.z, self.viewVector(vertex).coordinates()))
+        return Vector3D(*SoftwareCamera.calculateSurfaceProjection(self.width, self.height, self.angle, self.rotation.x, self.rotation.y, self.rotation.z, self.viewVector(vertex).coordinates()))

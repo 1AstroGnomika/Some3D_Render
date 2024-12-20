@@ -1,7 +1,9 @@
 import pygame
 from GameLogic import GameLogic
 from App.SoftwareApp import SoftwareApp
-from Render.RenderObject import RenderObject
+from App.HardwareApp import HardwareApp
+from Render.Software.SoftwareRenderObject import SoftwareRenderObject
+from Render.Hardware.HardwareRenderObject import HardwareRenderObject
 from Render.GeometryGenerator import GeometryGenerator
 from Handler.InputHandler import InputHandler
 from Handler.EventHandler import EventHandler
@@ -28,13 +30,20 @@ if __name__ == "__main__":
 
     GameLogic.App = SoftwareApp(FRAMES, ANGLE, WIDTH, HEIGTH, MINRENDERDISTANCE, MAXRENDERDISTANCE)
     
-    GameLogic.App.render.renderContainer.addToRender(OBJECT := RenderObject(
-        *GeometryGenerator.sphere(1, 50, 50),
-        10.0,
-        Vector3D(y=0, z=25.0),
-        Vector3D(y=90.0),
-        )
-    )
+    RenderObject = {
+        SoftwareApp.__name__: SoftwareRenderObject,
+        HardwareApp.__name__: HardwareRenderObject,
+    }.get(type(GameLogic.App).__name__)
+
+    for x in range(10):
+        for z in range(10):
+            GameLogic.App.render.renderContainer.addToRender(OBJECT := RenderObject(
+                *GeometryGenerator.cube(1),
+                1.0,
+                Vector3D(x=x, y=x-z, z=z),
+                Vector3D(),
+                )
+            )
 
     @InputHandler.handlerEvents.buttonPressed
     def post_buttonPressed(event:Events.Event) -> None:
@@ -44,9 +53,9 @@ if __name__ == "__main__":
         camera_rotation_speed:float = CAMERAROTATIONSPEED * ticks
         cube_rotation_speed:float = CUBEROTATESPEED * ticks
         multiple:Vector3D = Vector3D(camera_speed, camera_speed, camera_speed)
-        forward:Vector3D = GameLogic.App.render.camera.forward * multiple
-        right:Vector3D = GameLogic.App.render.camera.right * multiple
-        up:Vector3D = GameLogic.App.render.camera.up * multiple
+        forward:Vector3D = GameLogic.App.render.camera.forward() * multiple
+        right:Vector3D = GameLogic.App.render.camera.right() * multiple
+        up:Vector3D = GameLogic.App.render.camera.up() * multiple
         if button == Buttons.KEY_W:
             GameLogic.App.render.camera.point.x += forward.x
             GameLogic.App.render.camera.point.y += forward.y

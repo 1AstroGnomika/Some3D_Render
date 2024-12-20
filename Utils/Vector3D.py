@@ -42,6 +42,11 @@ class Vector3D:
 
     def magnitude(self) -> float:
         return math.sqrt(self.x ** 2 + self.y ** 2 + self.z ** 2)
+    
+    def normalize(self) -> "Vector3D":
+        if magnitude := self.magnitude():
+            return self / Vector3D(magnitude, magnitude, magnitude)
+        return Vector3D()
 
     def angle(self, other:"Vector3D") -> float:
         if magnitudes := self.magnitude() * other.magnitude():
