@@ -12,18 +12,19 @@ class SoftwareRender(AbstractRender):
     def initRender(self) -> None:
         self.display = pygame.display.set_mode((self.camera.width, self.camera.height))
 
-    def draw(self, renderObject:SoftwareRenderObject) -> None:
-        vertices:tuple[tuple[float, float, float]] = SoftwareRenderObject.calculateVertices(*renderObject.rotation.coordinates(), renderObject.size, renderObject.vertices)
-        for edge in renderObject.edges:
-            polygons:list[tuple[int, int]] = list()
-            for index in edge:
-                surfaceVertex:Vector3D = self.camera.surfaceProjection(renderObject.point - Vector3D(*vertices[index]))
-                if surfaceVertex.z > float():
-                    polygons.append((int(surfaceVertex.x), int(surfaceVertex.y)))
-                else:
-                    break
-            if len(polygons) > 1:
-                pygame.draw.polygon(self.display, Colors.WHITE, polygons, int(renderObject.size))
+    def draw(self, renderObject: SoftwareRenderObject) -> None:
+        world_vertices:tuple[Vector3D] = tuple(renderObject.point - Vector3D(*vertex) for vertex in SoftwareRenderObject.calculateVertices(*renderObject.rotation.coordinates(), renderObject.size, renderObject.vertices))
+        projected:tuple[Vector3D] = tuple(self.camera.surfaceProjection(vertex) for vertex in world_vertices)
+        for i1, i2, i3 in renderObject.triangles:
+            v0, v1, v2 = world_vertices[i1], world_vertices[i2], world_vertices[i3]
+            if (v1 - v0).cross(v2 - v0).dot(self.camera.point - v0) < 0:
+                pv0, pv1, pv2 = projected[i1], projected[i2], projected[i3]
+                if pv0.z > 0 and pv1.z > 0 and pv2.z > 0:
+                    pygame.draw.polygon(self.display, Colors.WHITE, (
+                        (int(pv0.x), int(pv0.y)),
+                        (int(pv1.x), int(pv1.y)),
+                        (int(pv2.x), int(pv2.y))
+                    ), int(renderObject.size))
 
     def render(self) -> None:
         self.display.fill(Colors.BLACK)

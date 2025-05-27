@@ -53,5 +53,8 @@ class Vector3D:
             return math.acos(self.dot(other) / magnitudes)
         return float()
     
+    def cross(self, other: "Vector3D") -> "Vector3D":
+        return Vector3D(self.y * other.z - self.z * other.y, self.z * other.x - self.x * other.z, self.x * other.y - self.y * other.x)
+    
     def coordinates(self) -> tuple[float]:
         return (self.x, self.y, self.z)

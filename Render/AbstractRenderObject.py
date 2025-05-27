@@ -5,11 +5,11 @@ from Utils.Vector3D import Vector3D
 class AbstractRenderObject(AbstacrtTransform):
 
     vertices:tuple[tuple[float, float, float]]
-    edges:tuple[tuple[int]]
+    triangles:tuple[tuple[int, int, int]]
     size:float
 
-    def __init__(self, vertices:tuple[tuple[float, float, float]], edges:tuple[tuple[int]], size:float, point:Vector3D, rotation:Vector3D) -> None:
+    def __init__(self, vertices:tuple[tuple[float, float, float]], triangles:tuple[tuple[int, int, int]], size:float, point:Vector3D, rotation:Vector3D) -> None:
         self.vertices = vertices
-        self.edges = edges
+        self.triangles = triangles
         self.size = size
         super().__init__(point, rotation)

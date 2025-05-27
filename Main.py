@@ -2,6 +2,7 @@ import pygame
 from GameLogic import GameLogic
 from App.SoftwareApp import SoftwareApp
 from App.HardwareApp import HardwareApp
+from Render.AbstractRenderObject import AbstractRenderObject
 from Render.Software.SoftwareRenderObject import SoftwareRenderObject
 from Render.Hardware.HardwareRenderObject import HardwareRenderObject
 from Render.GeometryGenerator import GeometryGenerator
@@ -30,20 +31,17 @@ if __name__ == "__main__":
 
     GameLogic.App = SoftwareApp(FRAMES, ANGLE, WIDTH, HEIGTH, MINRENDERDISTANCE, MAXRENDERDISTANCE)
     
-    RenderObject = {
+    RenderObject:AbstractRenderObject = {
         SoftwareApp.__name__: SoftwareRenderObject,
         HardwareApp.__name__: HardwareRenderObject,
     }.get(type(GameLogic.App).__name__)
 
-    for x in range(10):
-        for z in range(10):
-            GameLogic.App.render.renderContainer.addToRender(OBJECT := RenderObject(
-                *GeometryGenerator.cube(1),
-                1.0,
-                Vector3D(x=x, y=x-z, z=z),
-                Vector3D(),
-                )
-            )
+    GameLogic.App.render.renderContainer.addToRender(RenderObject(
+        *GeometryGenerator.sphere(10.0, 25, 25),
+        1.0,
+        Vector3D(0, 0, 25),
+        Vector3D(),
+    ))
 
     @InputHandler.handlerEvents.buttonPressed
     def post_buttonPressed(event:Events.Event) -> None:
@@ -84,18 +82,6 @@ if __name__ == "__main__":
             GameLogic.App.render.camera.rotation.z += camera_rotation_speed
         elif button == Buttons.KEY_E:
             GameLogic.App.render.camera.rotation.z -= camera_rotation_speed
-        elif button == Buttons.KEY_RIGHT:
-             OBJECT.rotation.x += cube_rotation_speed
-        elif button == Buttons.KEY_LEFT:
-             OBJECT.rotation.x -= cube_rotation_speed
-        elif button == Buttons.KEY_DOWN:
-             OBJECT.rotation.y -= cube_rotation_speed
-        elif button == Buttons.KEY_UP:
-            OBJECT.rotation.y += cube_rotation_speed
-        elif button == Buttons.KEY_NUM_PLUS:
-            OBJECT.size += cube_rotation_speed
-        elif button == Buttons.KEY_NUM_MINUS:
-            OBJECT.size -= cube_rotation_speed
         elif button == Buttons.KEY_ESC:
             GameLogic.App.running = not GameLogic.App.running
         else:

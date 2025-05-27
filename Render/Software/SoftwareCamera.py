@@ -5,12 +5,14 @@ from Render.Software.SoftwareRenderObject import SoftwareRenderObject
 
 class SoftwareCamera(AbstractCamera):
 
+    CAMERA_CACHE:int = 128
+
     def __call__(self, renderObject:SoftwareRenderObject) -> SoftwareRenderObject:
         if self.visible(renderObject):
             return renderObject
         return None
 
-    @lru_cache(maxsize=SoftwareRenderObject.SOFTWARE_RENDER_CACHE)
+    @lru_cache(maxsize=CAMERA_CACHE)
     def calculateSurfaceProjection(screenWidth:float, screenHeight:float, angle:float, pitch:float, yaw:float, roll:float, vertex:tuple[float, float, float]) -> tuple[float, float, float]:
         x, y, z = vertex
         cos_pitch, sin_pitch, cos_yaw, sin_yaw, cos_roll, sin_roll = SoftwareRenderObject.calculateAngles(pitch, yaw, roll)

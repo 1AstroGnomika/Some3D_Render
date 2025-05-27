@@ -6,16 +6,19 @@ class Events:
     class Event:
 
         func:Callable
-        args:Any
-        kwargs:Any
+        args:tuple[Any]
+        kwargs:dict[str, Any]
+        result:Any
 
         def __init__(self, func:Callable, *args, **kwargs) -> None:
             self.func = func
             self.args = args
             self.kwargs = kwargs
+            self.result = None
 
         def __call__(self) -> Any:
-            return self.func(*self.args, **self.kwargs)
+            self.result = self.func(*self.args, **self.kwargs)
+            return self.result
     
     PRE_EVENTS_INDEX:str = "pre"
     POST_EVENT_INDEX:str = "post"
@@ -36,20 +39,21 @@ class Events:
             event:Events.Event = Events.Event(func, *args, **kwargs)
             for pre_event in tuple(self.__pre_events.get(name, tuple())):
                 pre_event(event)
-            result = event()
+            if event.func:
+                event()
             for post_event in self.__post_events.get(name, tuple()):
                 post_event(event)
-            return result
+            return event.result
         return decorator
           
     def __getattr__(self, name:str) -> Callable:
         def decorator(func:Callable) -> Callable:
             event_list:list[Callable] = None
-            func_name:str = func.__name__.split("_").pop(0)
-            if func_name == Events.PRE_EVENTS_INDEX:
-                event_list = self.__pre_events.get(name)
-            elif func_name == Events.POST_EVENT_INDEX:
-                event_list = self.__post_events.get(name)
+            match func.__name__.split("_").pop(0):
+                case Events.PRE_EVENTS_INDEX:
+                    event_list = self.__pre_events.get(name)
+                case Events.POST_EVENT_INDEX:
+                    event_list = self.__post_events.get(name)
             if not event_list is None:
                 event_list.append(func)
             return func
