@@ -14,9 +14,9 @@ from Constants import Buttons
 
 if __name__ == "__main__":
 
-    ANGLE:float = 1.0
-    WIDTH:int = 800
-    HEIGTH:int = 600
+    FOW:float = 90
+    WIDTH:int = 1280
+    HEIGTH:int = 768
     MINRENDERDISTANCE:float = 0.0
     MAXRENDERDISTANCE:float = 500.0
     CAMERASPEED:float = 10.0
@@ -29,7 +29,7 @@ if __name__ == "__main__":
     pygame.mouse.set_visible(not MOUSECAPTION)
     pygame.event.set_grab(MOUSECAPTION)
 
-    GameLogic.App = SoftwareApp(FRAMES, ANGLE, WIDTH, HEIGTH, MINRENDERDISTANCE, MAXRENDERDISTANCE)
+    GameLogic.App = SoftwareApp(FRAMES, FOW, WIDTH, HEIGTH, MINRENDERDISTANCE, MAXRENDERDISTANCE)
     
     RenderObject:AbstractRenderObject = {
         SoftwareApp.__name__: SoftwareRenderObject,

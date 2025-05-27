@@ -7,7 +7,10 @@ class SoftwareRenderObject(AbstractRenderObject):
     SOFTWARE_RENDER_CACHE:int = 256
 
     def dimensions(self) -> tuple[float, float, float]:
-        return SoftwareRenderObject.calculateDimensions(SoftwareRenderObject.calculateVertices(*self.rotation.coordinates(), self.size, self.vertices))
+        return SoftwareRenderObject.calculateDimensions(*self.bounds())
+    
+    def bounds(self) -> tuple[float, float, float, float, float, float]:
+        return SoftwareRenderObject.calculateBounds(SoftwareRenderObject.calculateVertices(*self.rotation.coordinates(), self.size, self.vertices))
     
     @lru_cache(maxsize=SOFTWARE_RENDER_CACHE)
     def calculateScale(coordinates:tuple[float, float, float], size:float) -> tuple[float, float, float]:
@@ -40,7 +43,11 @@ class SoftwareRenderObject(AbstractRenderObject):
         return SoftwareRenderObject.calculateRotate(SoftwareRenderObject.calculateScale(coordinates, max(size, float())), *SoftwareRenderObject.calculateRotationAngles(pitch, yaw, roll))
     
     @lru_cache(maxsize=SOFTWARE_RENDER_CACHE)
-    def calculateDimensions(points:tuple[tuple[float, float, float]]) -> tuple[float, float, float]:
+    def calculateDimensions(min_x:float, max_x:float, min_y:float, max_y:float, min_z:float, max_z:float) -> tuple[float, float, float]:
+        return max_x - min_x, max_y - min_y, max_z - min_z
+    
+    @lru_cache(maxsize=SOFTWARE_RENDER_CACHE)
+    def calculateBounds(points:tuple[tuple[float, float, float]]) -> tuple[float, float, float, float, float, float]:
         min_x = min_y = min_z = float()
         max_x = max_y = max_z = float()
         for point in points:
@@ -51,7 +58,7 @@ class SoftwareRenderObject(AbstractRenderObject):
             max_y = max(max_y, y)
             min_z = min(min_z, z)
             max_z = max(max_z, z)
-        return max_x - min_x, max_y - min_y, max_z - min_z
+        return min_x, max_x, min_y, max_y, min_z, max_z
     
     @lru_cache(maxsize=SOFTWARE_RENDER_CACHE)
     def calculateVertices(pitch:float, yaw:float, roll:float, size:float, vertices:tuple[tuple[float, float, float]]) -> tuple[tuple[float, float, float]]:

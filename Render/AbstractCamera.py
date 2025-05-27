@@ -5,14 +5,14 @@ from Utils.Vector3D import Vector3D
 
 class AbstractCamera(AbstacrtTransform):
     
-    angle:float
+    fow:float
     width:int
     height:int
     minRenderDistance:float
     maxRenderDistance:float
 
-    def __init__(self, angle:float, width:int, height:int, minRenderDistance:float, maxRenderDistance:float, point:Vector3D=None, rotation:Vector3D=None) -> None:
-        self.angle = angle
+    def __init__(self, fow:float, width:int, height:int, minRenderDistance:float, maxRenderDistance:float, point:Vector3D=None, rotation:Vector3D=None) -> None:
+        self.fow = fow
         self.width = width
         self.height = height
         self.minRenderDistance = minRenderDistance
