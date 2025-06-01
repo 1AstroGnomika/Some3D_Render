@@ -16,10 +16,9 @@ class AbstractRender(ABC):
         self.initRender()
     
     def drawAll(self) -> None:
-        for renderObjects in tuple(self.renderContainer.renderObjects.values()):
-            for renderObject in sorted(iter(renderObjects), key=lambda renderObject: self.camera.point.distance(renderObject.point)):
-                if renderObject := self.camera(renderObject):
-                    self.draw(renderObject)
+        for renderObject in sorted(self.renderContainer.getRenderObjects(self.camera), key=lambda renderObject: self.camera.point.distance(renderObject.point), reverse=True):
+            if renderObject := self.camera(renderObject):
+                self.draw(renderObject)
     
     @abstractmethod
     def draw(self, renderObject:AbstractRenderObject) -> None: ...

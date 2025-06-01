@@ -36,12 +36,18 @@ if __name__ == "__main__":
         HardwareApp.__name__: HardwareRenderObject,
     }.get(type(GameLogic.App).__name__)
 
-    GameLogic.App.render.renderContainer.addToRender(RenderObject(
-        *GeometryGenerator.sphere(10.0, 25, 25),
-        1.0,
-        Vector3D(0, 0, 25),
-        Vector3D(),
-    ))
+    GameLogic.App.render.renderContainer.addToRender(RenderObject(*GeometryGenerator.sphere(1.0, 25, 25), 10.0, Vector3D(0, 0, 25), Vector3D()))
+    GameLogic.App.render.renderContainer.addToRender(RenderObject(*GeometryGenerator.cube(1.0), 10.0, Vector3D(0, 0, 50), Vector3D()))
+    GameLogic.App.render.renderContainer.addToRender(RenderObject(*GeometryGenerator.plane(width=1.0, height=1.0, segments_x=10, segments_y=10), 10.0, Vector3D(25, 0, 50), Vector3D()))
+    GameLogic.App.render.renderContainer.addToRender(RenderObject(*GeometryGenerator.cylinder(radius=1.0, height=1.0, segments=16), 10.0, Vector3D(-25, 0, 50), Vector3D()))
+
+
+    #blocks = 25
+    #cube = GeometryGenerator.cube(1.0)
+    #for x in range(blocks):
+    #    for y in range(blocks):
+    #        for z in range(blocks):
+    #            GameLogic.App.render.renderContainer.addToRender(RenderObject(*cube, 1.0, Vector3D(x, y, z), Vector3D()))
 
     @InputHandler.handlerEvents.buttonPressed
     def post_buttonPressed(event:Events.Event) -> None:

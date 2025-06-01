@@ -1,26 +1,23 @@
+from Render.Grid3D import Grid3D
 from Render.AbstractRenderObject import AbstractRenderObject
+from Render.AbstractCamera import AbstractCamera
 
 class RenderContainer:
 
-    __renderObjects:dict[str, set[AbstractRenderObject]]
+    CHUNK_WIDTH:int = 10
+    CHUNK_HEIGHT:int = 10
+    CHUNK_DEPTH:int = 10
+
+    chunks:Grid3D
 
     def __init__(self) -> None:
-        self.__renderObjects = dict()
+        self.chunks = Grid3D(RenderContainer.CHUNK_WIDTH, RenderContainer.CHUNK_HEIGHT, RenderContainer.CHUNK_DEPTH)
 
-    @property
-    def renderObjects(self) -> dict[str, set[AbstractRenderObject]]:
-        return self.__renderObjects
-
-    @staticmethod
-    def getContainerName(renderObject:AbstractRenderObject) -> str:
-        return type(renderObject).__name__
+    def getRenderObjects(self, camera:AbstractCamera) -> tuple[AbstractRenderObject]:
+        return tuple(self.chunks.raycast(2, 250, 50, camera.forward(), camera.point))
 
     def addToRender(self, renderObject:AbstractRenderObject) -> None:
-        renderContainer:set[renderObject] = self.renderObjects.get(name := RenderContainer.getContainerName(renderObject))
-        if renderContainer is None:
-            renderContainer = self.renderObjects.setdefault(name, set())
-        renderContainer.add(renderObject)
+        self.chunks.add(renderObject, renderObject.point)
 
     def removeFromRender(self, renderObject:AbstractRenderObject) -> None:
-        if container := self.__renderObjects.get(RenderContainer.getContainerName(renderObject)):
-            container.discard(renderObject)
+        self.chunks.remove(renderObject, renderObject.point)
