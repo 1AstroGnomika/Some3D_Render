@@ -117,7 +117,11 @@ if __name__ == "__main__":
                     continue
                 if parts[0] == 'v':
                     x, y, z = tuple(map(float, parts[1:4]))
-                    vertices.append((x, -y, z))
+                    vertices.append((
+                        x,
+                        y, 
+                        z
+                    ))
                 elif parts[0] == 'f':
                     faces:list[int] = list()
                     for part in parts[1:]:
@@ -131,9 +135,10 @@ if __name__ == "__main__":
         return tuple(vertices), tuple(triangles)
 
     app.render.renderObjects = (
-        RenderObject(*parse_obj("./Models/IS4.obj"), 5.0, Vector3D(0, 0, 35), Vector3D()),
-        RenderObject(*parse_obj("./Models/monkey.obj"), 10.0, Vector3D(25, 0, 25), Vector3D()),
-        RenderObject(*parse_obj("./Models/turtle.obj"), 1.5, Vector3D(-25, 0, 25), Vector3D(y=90))
+        RenderObject(*parse_obj("./Models/IS4.obj"), 5.0, Vector3D(0, 10, 35), Vector3D(x=180, y=180)),
+        RenderObject(*parse_obj("./Models/monkey.obj"), 5.0, Vector3D(25, 10, 35), Vector3D(x=180, y=180)),
+        RenderObject(*parse_obj("./Models/turtle.obj"), 1.0, Vector3D(-25, 10, 35), Vector3D(x=180, y=90)),
+        #RenderObject(*parse_obj("./Models/town.obj"), 0.025, Vector3D(), Vector3D(y=180))
     )
     while app.running:
         app.update()

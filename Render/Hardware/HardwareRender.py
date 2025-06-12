@@ -10,7 +10,7 @@ class HardwareRender(AbstractRender):
     camera: HardwareCamera
 
     def initRender(self) -> None:
-        self.display = pygame.display.set_mode((self.camera.width, self.camera.height), pygame.OPENGL | pygame.DOUBLEBUF)
+        pygame.display.set_mode((self.camera.width, self.camera.height), pygame.OPENGL | pygame.DOUBLEBUF | pygame.HWSURFACE)
         glEnable(GL_DEPTH_TEST)
         glDepthFunc(GL_LESS)
         glEnable(GL_CULL_FACE)
@@ -42,7 +42,8 @@ class HardwareRender(AbstractRender):
             projection = glm.perspective(glm.radians(self.camera.fow), self.camera.width / self.camera.height, self.camera.minRenderDistance, self.camera.maxRenderDistance)
             glUniformMatrix4fv(projection_loc, 1, GL_FALSE, glm.value_ptr(projection))
         glBindVertexArray(renderObject.VAOIndex)
-        glDrawArrays(GL_LINES, 0, len(renderObject.vertices) // 3)
+        #glPolygonMode(GL_FRONT_AND_BACK, GL_LINE)
+        glDrawArrays(GL_TRIANGLES, 0, renderObject.polygons)
 
     def render(self) -> None:
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
