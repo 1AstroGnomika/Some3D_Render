@@ -1,11 +1,9 @@
 import pygame
-from GameLogic import GameLogic
 from App.SoftwareApp import SoftwareApp
 from App.HardwareApp import HardwareApp
 from Render.AbstractRenderObject import AbstractRenderObject
 from Render.Software.SoftwareRenderObject import SoftwareRenderObject
 from Render.Hardware.HardwareRenderObject import HardwareRenderObject
-from Render.GeometryGenerator import GeometryGenerator
 from Handler.InputHandler import InputHandler
 from Handler.EventHandler import EventHandler
 from Utils.Vector3D import Vector3D
@@ -14,10 +12,10 @@ from Constants import Buttons
 
 if __name__ == "__main__":
 
-    FOW:float = 90
+    FOW:float = 120
     WIDTH:int = 1280
     HEIGTH:int = 768
-    MINRENDERDISTANCE:float = 0.0
+    MINRENDERDISTANCE:float = 0.1
     MAXRENDERDISTANCE:float = 500.0
     CAMERASPEED:float = 10.0
     CAMERAROTATIONSPEED:float = 10.0
@@ -29,67 +27,53 @@ if __name__ == "__main__":
     pygame.mouse.set_visible(not MOUSECAPTION)
     pygame.event.set_grab(MOUSECAPTION)
 
-    GameLogic.App = SoftwareApp(FRAMES, FOW, WIDTH, HEIGTH, MINRENDERDISTANCE, MAXRENDERDISTANCE)
+    app = HardwareApp(FRAMES, FOW, WIDTH, HEIGTH, MINRENDERDISTANCE, MAXRENDERDISTANCE)
     
     RenderObject:AbstractRenderObject = {
         SoftwareApp.__name__: SoftwareRenderObject,
         HardwareApp.__name__: HardwareRenderObject,
-    }.get(type(GameLogic.App).__name__)
-
-    GameLogic.App.render.renderContainer.addToRender(RenderObject(*GeometryGenerator.sphere(1.0, 25, 25), 10.0, Vector3D(0, 0, 25), Vector3D()))
-    GameLogic.App.render.renderContainer.addToRender(RenderObject(*GeometryGenerator.cube(1.0), 10.0, Vector3D(0, 0, 50), Vector3D()))
-    GameLogic.App.render.renderContainer.addToRender(RenderObject(*GeometryGenerator.plane(width=1.0, height=1.0, segments_x=10, segments_y=10), 10.0, Vector3D(25, 0, 50), Vector3D()))
-    GameLogic.App.render.renderContainer.addToRender(RenderObject(*GeometryGenerator.cylinder(radius=1.0, height=1.0, segments=16), 10.0, Vector3D(-25, 0, 50), Vector3D()))
-
-
-    #blocks = 25
-    #cube = GeometryGenerator.cube(1.0)
-    #for x in range(blocks):
-    #    for y in range(blocks):
-    #        for z in range(blocks):
-    #            GameLogic.App.render.renderContainer.addToRender(RenderObject(*cube, 1.0, Vector3D(x, y, z), Vector3D()))
+    }.get(type(app).__name__)
 
     @InputHandler.handlerEvents.buttonPressed
     def post_buttonPressed(event:Events.Event) -> None:
         button:int = event.args[0]
-        ticks:float = GameLogic.App.timer.lastTicks / GameLogic.App.timer.ticksPerSecond
+        ticks:float = app.timer.lastTicks / app.timer.tickPerSecond
         camera_speed:float = CAMERASPEED * ticks
         camera_rotation_speed:float = CAMERAROTATIONSPEED * ticks
-        cube_rotation_speed:float = CUBEROTATESPEED * ticks
         multiple:Vector3D = Vector3D(camera_speed, camera_speed, camera_speed)
-        forward:Vector3D = GameLogic.App.render.camera.forward() * multiple
-        right:Vector3D = GameLogic.App.render.camera.right() * multiple
-        up:Vector3D = GameLogic.App.render.camera.up() * multiple
+        forward:Vector3D = app.render.camera.forward() * multiple
+        right:Vector3D = app.render.camera.right() * multiple
+        up:Vector3D = app.render.camera.up() * multiple
         if button == Buttons.KEY_W:
-            GameLogic.App.render.camera.point.x += forward.x
-            GameLogic.App.render.camera.point.y += forward.y
-            GameLogic.App.render.camera.point.z += forward.z
+            app.render.camera.point.x += forward.x
+            app.render.camera.point.y += forward.y
+            app.render.camera.point.z += forward.z
         elif button == Buttons.KEY_S:
-             GameLogic.App.render.camera.point.x -= forward.x
-             GameLogic.App.render.camera.point.y -= forward.y
-             GameLogic.App.render.camera.point.z -= forward.z
+             app.render.camera.point.x -= forward.x
+             app.render.camera.point.y -= forward.y
+             app.render.camera.point.z -= forward.z
         elif button == Buttons.KEY_A:
-             GameLogic.App.render.camera.point.x -= right.x
-             GameLogic.App.render.camera.point.y -= right.y
-             GameLogic.App.render.camera.point.z -= right.z
+             app.render.camera.point.x -= right.x
+             app.render.camera.point.y -= right.y
+             app.render.camera.point.z -= right.z
         elif button == Buttons.KEY_D:
-             GameLogic.App.render.camera.point.x += right.x
-             GameLogic.App.render.camera.point.y += right.y
-             GameLogic.App.render.camera.point.z += right.z
+             app.render.camera.point.x += right.x
+             app.render.camera.point.y += right.y
+             app.render.camera.point.z += right.z
         elif button == Buttons.KEY_LSHIFT:
-             GameLogic.App.render.camera.point.x -= up.x
-             GameLogic.App.render.camera.point.y -= up.y
-             GameLogic.App.render.camera.point.z -= up.z
+             app.render.camera.point.x -= up.x
+             app.render.camera.point.y -= up.y
+             app.render.camera.point.z -= up.z
         elif button == Buttons.KEY_SPACE:
-             GameLogic.App.render.camera.point.x += up.x
-             GameLogic.App.render.camera.point.y += up.y
-             GameLogic.App.render.camera.point.z += up.z
+             app.render.camera.point.x += up.x
+             app.render.camera.point.y += up.y
+             app.render.camera.point.z += up.z
         elif button == Buttons.KEY_Q:
-            GameLogic.App.render.camera.rotation.z += camera_rotation_speed
+            app.render.camera.rotation.z += camera_rotation_speed
         elif button == Buttons.KEY_E:
-            GameLogic.App.render.camera.rotation.z -= camera_rotation_speed
+            app.render.camera.rotation.z -= camera_rotation_speed
         elif button == Buttons.KEY_ESC:
-            GameLogic.App.running = not GameLogic.App.running
+            app.running = not app.running
         else:
             print(button)
 
@@ -97,22 +81,59 @@ if __name__ == "__main__":
     def post_mouseShift(event:Events.Event) -> None:
         shiftX, shiftY = event.args[0]
         if shiftX or shiftY:
-            camera_rotation_speed: float = CAMERAROTATIONSPEED * (GameLogic.App.timer.lastTicks / GameLogic.App.timer.ticksPerSecond)
+            camera_rotation_speed: float = CAMERAROTATIONSPEED * (app.timer.lastTicks / app.timer.tickPerSecond)
             rotX:float = ((shiftX / 100.0) * camera_rotation_speed)
             rotY:float = ((shiftY / 100.0) * camera_rotation_speed)
-            GameLogic.App.render.camera.rotation.x -= rotX
-            GameLogic.App.render.camera.rotation.y -= rotY
+            app.render.camera.rotation.x -= rotX
+            app.render.camera.rotation.y -= rotY
             if MOUSECAPTION:
-                pygame.mouse.set_pos((GameLogic.App.render.camera.width // 2, GameLogic.App.render.camera.height // 2))
+                pygame.mouse.set_pos((app.render.camera.width // 2, app.render.camera.height // 2))
+
+    @InputHandler.handlerEvents.mouseButtonDown
+    def post_mouseButtonDown(event:Events.Event) -> None:
+        ...
+
+    @InputHandler.handlerEvents.mouseButtonUp
+    def post_mouseButtonUp(event:Events.Event) -> None:
+        ...
 
     @EventHandler.handlerEvents.handleEvent
     def post_event(event:Events.Event) -> None:
         pygameEvent:pygame.event.Event = event.args[0]
         if pygameEvent.type == pygame.QUIT:
-            GameLogic.App.running = not GameLogic.App.running
+            app.running = not app.running
 
     @EventHandler.handlerEvents.handle
     def post_handle(event:Events.Event) -> None:
-        pygame.display.set_caption(f"Framarate: {round(GameLogic.App.pygameTimer.get_fps(), 1)}")
+        pygame.display.set_caption(f"Framarate: {round(app.pygameTimer.get_fps(), 1)}")
 
-    GameLogic.mainLoop()
+    def parse_obj(path:str):
+        vertices:list[tuple[int, int, int]] = list()
+        triangles:list[tuple[int, int]] = []
+        with open(path, 'r') as model:
+            for line in model:
+                parts = line.strip().split()
+                if not parts:
+                    continue
+                if parts[0] == 'v':
+                    x, y, z = tuple(map(float, parts[1:4]))
+                    vertices.append((x, -y, z))
+                elif parts[0] == 'f':
+                    faces:list[int] = list()
+                    for part in parts[1:]:
+                        faces.append(int(part.split('/')[0]) - 1)
+                    for index in range(1, len(faces) - 1):
+                        triangles.append((
+                            faces[0],
+                            faces[index],
+                            faces[index + 1]
+                        ))
+        return tuple(vertices), tuple(triangles)
+
+    app.render.renderObjects = (
+        RenderObject(*parse_obj("./Models/IS4.obj"), 5.0, Vector3D(0, 0, 35), Vector3D()),
+        RenderObject(*parse_obj("./Models/monkey.obj"), 10.0, Vector3D(25, 0, 25), Vector3D()),
+        RenderObject(*parse_obj("./Models/turtle.obj"), 1.5, Vector3D(-25, 0, 25), Vector3D(y=90))
+    )
+    while app.running:
+        app.update()

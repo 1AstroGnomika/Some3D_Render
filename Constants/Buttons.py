@@ -1,3 +1,6 @@
+MOUSE_LEFT_CLICK:int = 1
+MOUSE_ROLL_CLICK:int = 2
+MOUSE_RIGHT_CLICK:int = 3
 KEY_A:int = 4
 KEY_D:int = 7
 KEY_E:int = 8

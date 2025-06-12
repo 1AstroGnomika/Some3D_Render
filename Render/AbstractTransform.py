@@ -1,8 +1,8 @@
 from math import sin, cos
-from abc import ABC, abstractmethod
+from abc import ABC
 from Utils.Vector3D import Vector3D
 
-class AbstacrtTransform(ABC):
+class AbstractTransform(ABC):
 
     point:Vector3D
     rotation:Vector3D

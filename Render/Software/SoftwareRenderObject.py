@@ -1,10 +1,18 @@
 from math import sin, cos, radians
 from functools import lru_cache
 from Render.AbstractRenderObject import AbstractRenderObject
+from Utils.Vector3D import Vector3D
 
 class SoftwareRenderObject(AbstractRenderObject):
 
     SOFTWARE_RENDER_CACHE:int = 256
+
+    vertices:tuple[tuple[float, float, float]]
+    triangles:tuple[tuple[int, int, int]]
+
+    def initVertices(self, vertices:tuple[tuple[float, float, float]], triangles:tuple[tuple[int, int, int]]) -> None:
+        self.vertices = vertices
+        self.triangles = triangles
 
     def dimensions(self) -> tuple[float, float, float]:
         return SoftwareRenderObject.calculateDimensions(*self.bounds())

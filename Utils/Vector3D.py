@@ -56,5 +56,8 @@ class Vector3D:
     def cross(self, other: "Vector3D") -> "Vector3D":
         return Vector3D(self.y * other.z - self.z * other.y, self.z * other.x - self.x * other.z, self.x * other.y - self.y * other.x)
     
+    def reverse(self) -> "Vector3D":
+        return Vector3D(-self.x, -self.y, -self.z)
+
     def coordinates(self) -> tuple[float]:
         return (self.x, self.y, self.z)

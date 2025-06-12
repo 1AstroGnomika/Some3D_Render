@@ -24,7 +24,7 @@ class AbstractApp(ABC):
         EventHandler.handle()
         InputHandler.handle()
         self.render.render()
-        self.pygameTimer.tick(self.timer.ticksPerSecond)
+        self.pygameTimer.tick(self.timer.tickPerSecond)
 
     @abstractmethod
     def getCamera(self) -> Type[AbstractCamera]: ...

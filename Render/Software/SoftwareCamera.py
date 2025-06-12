@@ -20,12 +20,12 @@ class SoftwareCamera(AbstractCamera):
         x, z = cos_pitch * x + sin_pitch * z, -sin_pitch * x + cos_pitch * z
         y, z = cos_yaw * y - sin_yaw * z, sin_yaw * y + cos_yaw * z
         x, y = cos_roll * x - sin_roll * y, sin_roll * x + cos_roll * y
-        #aspect_ratio = renderWidth / renderHeight
+        aspect_ratio = renderWidth / renderHeight
         fov_rad = radians(fov)
         f = 1 / tan(fov_rad / 2)
         correct_z = z or 0.01
-        screen_x = (x * f / correct_z)# * aspect_ratio
-        screen_y = (y * f / correct_z)# * aspect_ratio
+        screen_x = (x * f / correct_z)
+        screen_y = (y * f / correct_z) * aspect_ratio
         pixel_x = (screen_x + 1) * renderWidth / 2
         pixel_y = (1 - screen_y) * renderHeight / 2
         return pixel_x, pixel_y, z

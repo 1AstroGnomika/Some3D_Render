@@ -1,9 +1,9 @@
 from abc import abstractmethod
-from Render.AbstacrtTransform import AbstacrtTransform
+from Render.AbstractTransform import AbstractTransform
 from Render.AbstractRenderObject import AbstractRenderObject
 from Utils.Vector3D import Vector3D
 
-class AbstractCamera(AbstacrtTransform):
+class AbstractCamera(AbstractTransform):
     
     fow:float
     width:int
@@ -21,6 +21,3 @@ class AbstractCamera(AbstacrtTransform):
 
     @abstractmethod
     def __call__(self, renderObject:AbstractRenderObject) -> AbstractRenderObject: ...
-
-    @abstractmethod
-    def direction(self, vertex:Vector3D) -> Vector3D: ...
