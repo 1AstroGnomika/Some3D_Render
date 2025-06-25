@@ -1,28 +1,20 @@
 from math import sin, cos, radians
 from functools import lru_cache
+from Meshes.Mesh import Mesh
 from Render.AbstractRenderObject import AbstractRenderObject
-from Utils.Vector3D import Vector3D
 
 class SoftwareRenderObject(AbstractRenderObject):
 
     SOFTWARE_RENDER_CACHE:int = 256
-
-    vertices:tuple[tuple[float, float, float]]
-    triangles:tuple[tuple[int, int, int]]
-
-    def initVertices(self, vertices:tuple[tuple[float, float, float]], triangles:tuple[tuple[int, int, int]]) -> None:
-        self.vertices = vertices
-        self.triangles = triangles
-
-    def dimensions(self) -> tuple[float, float, float]:
-        return SoftwareRenderObject.calculateDimensions(*self.bounds())
     
-    def bounds(self) -> tuple[float, float, float, float, float, float]:
-        return SoftwareRenderObject.calculateBounds(SoftwareRenderObject.calculateVertices(*self.rotation.coordinates(), self.size, self.vertices))
+    mesh:Mesh = None
+
+    def processMesh(self, mesh:Mesh) -> None:
+        self.mesh = mesh
     
     @lru_cache(maxsize=SOFTWARE_RENDER_CACHE)
-    def calculateScale(coordinates:tuple[float, float, float], size:float) -> tuple[float, float, float]:
-        return tuple(map(lambda coordinate: coordinate * size, coordinates))
+    def calculateScale(coordinates:tuple[float, float, float], size:tuple[float, float, float]) -> tuple[float, float, float]:
+        return (coordinates[0] * size[0], coordinates[1] * size[1], coordinates[2] * size[2])
 
     @lru_cache(maxsize=SOFTWARE_RENDER_CACHE)
     def calculateAngles(pitch:float, yaw:float, roll:float) -> tuple[float, float, float, float, float, float]:
@@ -47,27 +39,5 @@ class SoftwareRenderObject(AbstractRenderObject):
         return (x_rot * cos_pitch + z_rot_final * sin_pitch, y_final, -x_rot * sin_pitch + z_rot_final * cos_pitch)
     
     @lru_cache(maxsize=SOFTWARE_RENDER_CACHE)
-    def calculateCoordinates(pitch:float, yaw:float, roll:float, size:float, coordinates:tuple[float, float, float]) -> tuple[float, float, float]:
-        return SoftwareRenderObject.calculateRotate(SoftwareRenderObject.calculateScale(coordinates, max(size, float())), *SoftwareRenderObject.calculateRotationAngles(pitch, yaw, roll))
-    
-    @lru_cache(maxsize=SOFTWARE_RENDER_CACHE)
-    def calculateDimensions(min_x:float, max_x:float, min_y:float, max_y:float, min_z:float, max_z:float) -> tuple[float, float, float]:
-        return max_x - min_x, max_y - min_y, max_z - min_z
-    
-    @lru_cache(maxsize=SOFTWARE_RENDER_CACHE)
-    def calculateBounds(points:tuple[tuple[float, float, float]]) -> tuple[float, float, float, float, float, float]:
-        min_x = min_y = min_z = float()
-        max_x = max_y = max_z = float()
-        for point in points:
-            x, y, z = point
-            min_x = min(min_x, x)
-            max_x = max(max_x, x)
-            min_y = min(min_y, y)
-            max_y = max(max_y, y)
-            min_z = min(min_z, z)
-            max_z = max(max_z, z)
-        return min_x, max_x, min_y, max_y, min_z, max_z
-    
-    @lru_cache(maxsize=SOFTWARE_RENDER_CACHE)
-    def calculateVertices(pitch:float, yaw:float, roll:float, size:float, vertices:tuple[tuple[float, float, float]]) -> tuple[tuple[float, float, float]]:
-        return tuple(map(lambda vertex: SoftwareRenderObject.calculateCoordinates(pitch, yaw, roll, size, vertex), vertices))
+    def calculateCoordinates(pitch:float, yaw:float, roll:float, size:tuple[float, float, float], coordinates:tuple[float, float, float]) -> tuple[float, float, float]:
+        return SoftwareRenderObject.calculateRotate(SoftwareRenderObject.calculateScale(coordinates, size), *SoftwareRenderObject.calculateRotationAngles(pitch, yaw, roll))

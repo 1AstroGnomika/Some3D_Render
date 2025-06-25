@@ -1,15 +1,16 @@
 from abc import abstractmethod
+from Meshes.Mesh import Mesh
 from Render.AbstractTransform import AbstractTransform
-from Utils.Vector3D import Vector3D
+from Utils.Vectors.Vector3D import Vector3D
 
 class AbstractRenderObject(AbstractTransform):
 
-    size:float
+    size:Vector3D
 
-    def __init__(self, vertices:tuple[tuple[float, float, float]], triangles:tuple[tuple[int, int, int]], size:float, point:Vector3D, rotation:Vector3D) -> None:
+    def __init__(self, mesh:Mesh, size:Vector3D, point:Vector3D, rotation:Vector3D) -> None:
         self.size = size
-        self.initVertices(vertices, triangles)
+        self.processMesh(mesh)
         super().__init__(point, rotation)
 
-        @abstractmethod
-        def initVertices(self, vertices:tuple[tuple[float, float, float]], triangles:tuple[tuple[int, int, int]]) -> None: ...
+    @abstractmethod
+    def processMesh(self, mesh:Mesh) -> None: ...

@@ -1,19 +1,15 @@
 from math import tan, radians
-from functools import lru_cache
-from Utils.Vector3D import Vector3D
+from Utils.Vectors.Vector3D import Vector3D
 from Render.AbstractCamera import AbstractCamera
 from Render.Software.SoftwareRenderObject import SoftwareRenderObject
 
 class SoftwareCamera(AbstractCamera):
-
-    CAMERA_CACHE:int = 128
 
     def __call__(self, renderObject:SoftwareRenderObject) -> SoftwareRenderObject:
         if self.visible(renderObject):
             return renderObject
         return None
 
-    @lru_cache(maxsize=CAMERA_CACHE)
     def calculateSurfaceProjection(renderWidth:float, renderHeight:float, fov:float, pitch:float, yaw:float, roll:float, vertex:tuple[float, float, float]) -> tuple[float, float, float]:
         x, y, z = vertex
         cos_pitch, sin_pitch, cos_yaw, sin_yaw, cos_roll, sin_roll = SoftwareRenderObject.calculateAngles(pitch, yaw, roll)
@@ -29,34 +25,13 @@ class SoftwareCamera(AbstractCamera):
         pixel_x = (screen_x + 1) * renderWidth / 2
         pixel_y = (1 - screen_y) * renderHeight / 2
         return pixel_x, pixel_y, z
-    
-    @lru_cache(maxsize=CAMERA_CACHE)
-    def calculateSurfaceRect(renderWidth:float, renderHeight:float, width:float, height:float, depth:float, screenX:float, screenY:float, screenZ:float) -> tuple[int, int, int, int]:
-        screenSizeX = (renderWidth / 3) * (width / screenZ)
-        screenSizeY = (renderHeight / 3) * (height / screenZ)
-        return (
-            int(screenX - screenSizeX),
-            int(screenY - screenSizeY),
-            int(screenSizeX * 2),
-            int(screenSizeY * 2)
-        )
 
     def direction(self, vertex:Vector3D) -> Vector3D:
         return vertex - self.point
     
     def visible(self, renderObject:SoftwareRenderObject) -> bool:
         distance:float = self.point.distance(renderObject.point)
-        if distance >= self.minRenderDistance and distance <= self.maxRenderDistance:
-            width, height, depth = renderObject.dimensions()
-            if distance >= depth / 2:
-                screenX, screenY, screenZ = self.surfaceProjection(renderObject.point).coordinates()
-                if (screenZ * 2) > (depth / 2):
-                    rectX, rectY, rectWidth, rectHeight = SoftwareCamera.calculateSurfaceRect(self.width, self.height, width, height, depth, screenX, screenY, screenZ)
-                    return (rectX + rectWidth > 0 and rectY + rectHeight > 0 and rectX < self.width and rectY < self.height)
-        return bool()
-    
-    def surfaceRect(self, renderObject:SoftwareRenderObject) -> tuple[int, int, int, int]:
-        return SoftwareCamera.calculateSurfaceRect(self.width, self.height, *renderObject.dimensions(), *self.surfaceProjection(renderObject.point).coordinates())
+        return distance >= self.minRenderDistance and distance <= self.maxRenderDistance
     
     def surfaceProjection(self, vertex:Vector3D) -> Vector3D:
         return Vector3D(*SoftwareCamera.calculateSurfaceProjection(self.width, self.height, self.fow, self.rotation.x, self.rotation.y, self.rotation.z, self.direction(vertex).coordinates()))

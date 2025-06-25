@@ -1,7 +1,7 @@
 from abc import abstractmethod
 from Render.AbstractTransform import AbstractTransform
 from Render.AbstractRenderObject import AbstractRenderObject
-from Utils.Vector3D import Vector3D
+from Utils.Vectors.Vector3D import Vector3D
 
 class AbstractCamera(AbstractTransform):
     

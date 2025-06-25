@@ -1,6 +1,6 @@
 from math import sin, cos
 from abc import ABC
-from Utils.Vector3D import Vector3D
+from Utils.Vectors.Vector3D import Vector3D
 
 class AbstractTransform(ABC):
 

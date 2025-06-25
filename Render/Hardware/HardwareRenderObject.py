@@ -1,23 +1,62 @@
-from OpenGL.GL import GL_FLOAT, GL_FALSE, GL_ARRAY_BUFFER, GL_STATIC_DRAW, glGenVertexArrays, glGenBuffers, glBindVertexArray, glBindBuffer, glBufferData, glVertexAttribPointer, glEnableVertexAttribArray
-from numpy import array, float32
+from Render.Hardware.Buffers.ShaderGLResourcePool import ShaderGLInputData, ShaderGLResourceData, ShaderGLResourcePool
+from Render.Hardware.Buffers.MeshGLResourcePool import MeshGLInputData, MeshGLResourceData, MeshGLResourcePool
+from Render.Hardware.Buffers.TextureGLResourcePool import TextureGLInputData, TextureGLResourceData, TextureGLResourcePool
 from Render.AbstractRenderObject import AbstractRenderObject
-from Render.Hardware.Shaders.Shader import Shader
+from Meshes.Mesh import Mesh
+from array import array
 
 class HardwareRenderObject(AbstractRenderObject):
     
-    shader:Shader
-    VAOIndex:int
-    VBOIndex:int
-    polygons:int
+    SHADERDATA:ShaderGLResourcePool = ShaderGLResourcePool()
+    MESHDATA:MeshGLResourcePool = MeshGLResourcePool()
+    TEXTUREDATA:TextureGLResourcePool = TextureGLResourcePool()
 
-    def initVertices(self, vertices:tuple[tuple[float, float, float]], triangles:tuple[tuple[int, int, int]]) -> None:
-        vertices:array[float32] = array(object=tuple(vertex for triangle in triangles for index in triangle for vertex in vertices[index]), dtype=float32)
-        self.shader = Shader()
-        self.VAOIndex = glGenVertexArrays(1)
-        self.VBOIndex = glGenBuffers(1)
-        self.polygons = len(vertices) // 3
-        glBindVertexArray(self.VAOIndex)
-        glBindBuffer(GL_ARRAY_BUFFER, self.VBOIndex)
-        glBufferData(GL_ARRAY_BUFFER, vertices.nbytes, vertices, GL_STATIC_DRAW)
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, None)
-        glEnableVertexAttribArray(0)
+    __shader:ShaderGLResourceData = None
+    __mesh:MeshGLResourceData = None
+    __texture:TextureGLResourceData = None
+
+    @property
+    def shader(self) -> ShaderGLResourceData:
+        return self.__shader
+
+    @shader.setter
+    def shader(self, shader:ShaderGLInputData):
+        if self.__shader:
+            HardwareRenderObject.SHADERDATA.releaseGLResource(self.__shader)
+        if shader:
+            self.__shader = HardwareRenderObject.SHADERDATA.getGLResource(shader)
+
+    @property
+    def mesh(self) -> MeshGLResourceData:
+        return self.__mesh
+
+    @mesh.setter
+    def mesh(self, mesh:MeshGLInputData):
+        if self.__mesh:
+            HardwareRenderObject.MESHDATA.releaseGLResource(self.__mesh)
+        if mesh:
+            self.__mesh = HardwareRenderObject.MESHDATA.getGLResource(mesh)
+
+    @property
+    def texture(self) -> TextureGLResourceData:
+        return self.__texture
+
+    @texture.setter
+    def texture(self, texture:TextureGLInputData):
+        if self.__texture:
+            HardwareRenderObject.TEXTUREDATA.releaseGLResource(self.__texture)
+        if texture:
+            self.__texture = HardwareRenderObject.TEXTUREDATA.getGLResource(texture)
+
+    def processMesh(self, mesh: Mesh) -> None:
+        self.shader = ShaderGLInputData()
+        self.mesh = MeshGLInputData(array("f", tuple(
+            item for face in mesh.faces for vi, vti, vni in face
+            for item in (*mesh.vertices[vi], *mesh.texcoords[vti], *mesh.normals[vni])
+        )).tobytes())
+        self.texture = TextureGLInputData(mesh.texture) if mesh.texture else None
+
+    def __del__(self) -> None:
+        self.shader = None
+        self.mesh = None
+        self.texture = None
